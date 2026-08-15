@@ -43,28 +43,54 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         const emailError = validateEmail(email);
         const passwordError = validatePassword(password);
-
         if (emailError || passwordError) {
-            setErrors({ email: emailError, password: passwordError });
+            setErrors({
+                email: emailError,
+                password: passwordError,
+            });
             return;
         }
         setSubmitting(true);
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        setSubmitting(false);
-        Swal.fire({
-            icon: "success",
-            title: "Login berhasil",
-            text: "Selamat datang kembali!",
-            confirmButtonColor: "#0B2B8E",
-            timer: 1500,
-            showConfirmButton: false,
-        }).then(() => {
-            navigate("/user-management");
-        });
+        try {
+            const response = await fetch("http://localhost:8000/login",
+                {
+                    method: "POST", headers: { "Content-Type": "application/json", },
+                    body: JSON.stringify({
+                        email: email.trim(),
+                        password: password,
+                    }),
+                });
+            const data = await response.json();
+            if (!response.ok) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Login gagal",
+                    text: data.message || "Email atau password salah",
+                    confirmButtonColor: "#0B2B8E",
+                }); return;
+            } Swal.fire
+                ({
+                    icon: "success",
+                    title: "Login berhasil",
+                    text: "Selamat datang kembali!",
+                    confirmButtonColor: "#0B2B8E",
+                    timer: 1500, showConfirmButton: false
+                    ,
+                }).then(() => {
+                    navigate("/user-management");
+                });
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Koneksi gagal",
+                text: "Tidak dapat terhubung ke server.",
+                confirmButtonColor: "#0B2B8E",
+            });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -138,7 +164,7 @@ export default function Login() {
                         {errors.password && <div className="text-danger small mb-2">{errors.password}</div>}
 
                         <div className="text-end mb-3 mt-1">
-                            <a href="#" className="small text-dark text-decoration-none fw-semibold">Lupa Sandi?</a>
+                            <a href="/register" className="small text-dark text-decoration-none fw-semibold" style={{ color: "#0B2B8E" }}>Belum Membuat Akun?</a>
                         </div>
 
                         <button

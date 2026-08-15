@@ -13,12 +13,14 @@ import Dashboard from "./component/Dashboard";
 import UserManagement from "./component/User-Manajemen/UserManagement";
 import TambahDataUser from "./component/User-Manajemen/TambahDataUser";
 import EditDataUser from "./component/User-Manajemen/EditDataUser";
+import Register from "./component/Register";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/edit-data-management" element={<EditDataUser />} />
         <Route path="/tambah-data-management" element={<TambahDataUser />} />
 
