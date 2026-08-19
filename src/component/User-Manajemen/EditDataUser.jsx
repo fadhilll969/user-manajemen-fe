@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 
+const API_URL = "http://127.0.0.1:8000";
+
 const TITLE_OPTIONS = [
     { value: "Tn", label: "Tuan" },
     { value: "Ny", label: "Nyonya" },
@@ -34,7 +36,7 @@ export default function EditDataUser() {
         email: userToEdit?.email || "",
         tanggalLahir: toInputDateFormat(userToEdit?.tanggalLahir) || "",
         role: userToEdit?.role || "",
-        status: userToEdit?.status || "active", 
+        status: userToEdit?.status || "active",
         alasanNonAktif: userToEdit?.alasanNonAktif || "",
     });
 
@@ -170,25 +172,50 @@ export default function EditDataUser() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const phoneError = validatePhone(formData.noHandphone) || (formData.noHandphone === "" ? "No. Handphone wajib diisi" : "");
-        const emailError = validateEmail(formData.email) || (formData.email === "" ? "Email wajib diisi" : "");
+        const phoneError =
+            validatePhone(formData.noHandphone) ||
+            (formData.noHandphone === ""
+                ? "No. Handphone wajib diisi"
+                : "");
+
+        const emailError =
+            validateEmail(formData.email) ||
+            (formData.email === ""
+                ? "Email wajib diisi"
+                : "");
 
         let passwordError = "";
         let confirmPasswordError = "";
+
         if (ubahSandi) {
-            passwordError = validatePassword(password) || (password === "" ? "Kata sandi wajib diisi" : "");
+            passwordError =
+                validatePassword(password) ||
+                (password === ""
+                    ? "Kata sandi wajib diisi"
+                    : "");
+
             confirmPasswordError =
                 validateConfirmPassword(confirmPassword, password) ||
-                (confirmPassword === "" ? "Konfirmasi kata sandi wajib diisi" : "");
+                (confirmPassword === ""
+                    ? "Konfirmasi kata sandi wajib diisi"
+                    : "");
         }
 
-        const alasanError = isNonActive && formData.alasanNonAktif.trim() === ""
-            ? "Alasan non aktif wajib diisi"
-            : "";
+        const alasanError =
+            isNonActive &&
+                formData.alasanNonAktif.trim() === ""
+                ? "Alasan non aktif wajib diisi"
+                : "";
 
         if (
-            phoneError || emailError || passwordError || confirmPasswordError || alasanError ||
-            !formData.nama || !formData.tanggalLahir || !formData.role
+            phoneError ||
+            emailError ||
+            passwordError ||
+            confirmPasswordError ||
+            alasanError ||
+            !formData.nama.trim() ||
+            !formData.tanggalLahir ||
+            !formData.role
         ) {
             setErrors({
                 noHandphone: phoneError,
@@ -197,57 +224,96 @@ export default function EditDataUser() {
                 confirmPassword: confirmPasswordError,
                 alasanNonAktif: alasanError,
             });
+
+            return;
+        }
+
+        if (!userToEdit?.id) {
+            Swal.fire({
+                icon: "error",
+                title: "Data user tidak ditemukan",
+                text: "ID user tidak tersedia.",
+                confirmButtonColor: "#0B2B8E",
+            });
+
             return;
         }
 
         setSubmitting(true);
         setSubmitError("");
 
-        await new Promise((resolve) => setTimeout(resolve, 700));
-
         try {
-            const savedUsers = localStorage.getItem("users_data");
-            const users = savedUsers ? JSON.parse(savedUsers) : [];
+            const bodyData = {
+                title: formData.title,
+                nama: formData.nama.trim(),
+                noHandphone: formData.noHandphone,
+                email: formData.email.trim(),
+                tanggalLahir: formatTanggalLahir(
+                    formData.tanggalLahir
+                ),
+                role: formData.role,
+                status: formData.status,
+                alasanNonAktif: isNonActive
+                    ? formData.alasanNonAktif.trim()
+                    : "",
+            };
 
-            const emailDipakaiUserLain = users.some(
-                (u) => u.id !== userToEdit?.id && u.email.toLowerCase() === formData.email.trim().toLowerCase()
-            );
-
-            if (emailDipakaiUserLain) {
-                setSubmitting(false);
-                setSubmitError("Ups, terjadi kesalahan. Pastikan data yang dimasukkan sudah benar. Coba lagi!");
-                return;
+            if (ubahSandi) {
+                bodyData.password = password;
             }
 
-            const updatedUsers = users.map((u) => {
-                if (u.id !== userToEdit?.id) return u;
-                return {
-                    ...u,
-                    title: formData.title,
-                    nama: formData.nama,
-                    noHandphone: `(+62) ${formData.noHandphone}`,
-                    email: formData.email,
-                    tanggalLahir: formatTanggalLahir(formData.tanggalLahir),
-                    role: formData.role,
-                    status: formData.status,
-                    alasanNonAktif: isNonActive ? formData.alasanNonAktif : "",
-                };
-            });
+            const response = await fetch(
+                `${API_URL}/users/${userToEdit.id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(bodyData),
+                }
+            );
 
-            localStorage.setItem("users_data", JSON.stringify(updatedUsers));
+            const result = await response.json();
 
-            setSubmitting(false);
+            if (!response.ok) {
+                throw new Error(
+                    result.message ||
+                    "Gagal memperbarui data user"
+                );
+            }
 
-            Swal.fire({
+            await Swal.fire({
                 icon: "success",
                 title: "Perubahan data berhasil disimpan",
+                text: "Data user berhasil diperbarui di database.",
                 confirmButtonColor: "#0B2B8E",
-            }).then(() => {
-                navigate("/user-management");
             });
-        } catch (err) {
+
+            navigate("/user-management");
+
+        } catch (error) {
+            console.error(
+                "Error update user:",
+                error
+            );
+
+            setSubmitError(
+                error.message ||
+                "Tidak dapat terhubung ke server."
+            );
+
+            Swal.fire({
+                icon: "error",
+                title: "Gagal",
+                text:
+                    error.message ||
+                    "Tidak dapat terhubung ke server.",
+                confirmButtonColor: "#0B2B8E",
+            });
+
+        } finally {
             setSubmitting(false);
-            setSubmitError("Ups, terjadi kesalahan. Pastikan data yang dimasukkan sudah benar. Coba lagi!");
+
         }
     };
 
