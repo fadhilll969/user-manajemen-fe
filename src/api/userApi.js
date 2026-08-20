@@ -1,11 +1,16 @@
 import axios from "axios";
 
+// =========================
+// BASE API URL
+// =========================
+
 const API_URL =
   "https://user-manajemen-be-production.up.railway.app";
 
 // =========================
 // LOGIN
 // =========================
+
 export const loginUser = async (data) => {
   const response = await axios.post(
     `${API_URL}/login`,
@@ -23,6 +28,7 @@ export const loginUser = async (data) => {
 // =========================
 // BUAT USER BARU
 // =========================
+
 export const createUser = async (data) => {
   const response = await axios.post(
     `${API_URL}/register`,
@@ -40,6 +46,7 @@ export const createUser = async (data) => {
 // =========================
 // GET USERS
 // =========================
+
 export const getUsers = async () => {
   const response = await axios.get(
     `${API_URL}/users`
