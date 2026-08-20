@@ -1,26 +1,45 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-
-// Sesuaikan path dengan lokasi file userApi.js kamu
 import { tambahDataUser } from "../api/userApi";
 
+// =====================================================
+// TITLE OPTIONS
+// =====================================================
 const TITLE_OPTIONS = [
-  { value: "Tn", label: "Tuan" },
-  { value: "Ny", label: "Nyonya" },
-  { value: "Nn", label: "Nona" },
+  {
+    value: "Tn",
+    label: "Tuan",
+  },
+  {
+    value: "Ny",
+    label: "Nyonya",
+  },
+  {
+    value: "Nn",
+    label: "Nona",
+  },
 ];
 
-// Hanya menerima email Gmail
+// =====================================================
+// VALIDASI EMAIL
+// Hanya Gmail
+// =====================================================
 const EMAIL_REGEX =
   /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@gmail\.com$/;
 
+// =====================================================
+// VALIDASI PASSWORD
 // Minimal 8 karakter
+// =====================================================
 const PASSWORD_REGEX = /^.{8,}$/;
 
 export default function TambahDataUser() {
   const navigate = useNavigate();
 
+  // =====================================================
+  // FORM DATA
+  // =====================================================
   const [formData, setFormData] = useState({
     title: "Tn",
     nama: "",
@@ -32,6 +51,9 @@ export default function TambahDataUser() {
     confirmPassword: "",
   });
 
+  // =====================================================
+  // ERROR
+  // =====================================================
   const [errors, setErrors] = useState({
     noHandphone: "",
     email: "",
@@ -39,9 +61,14 @@ export default function TambahDataUser() {
     confirmPassword: "",
   });
 
-  // =========================
+  // =====================================================
+  // LOADING
+  // =====================================================
+  const [loading, setLoading] = useState(false);
+
+  // =====================================================
   // VALIDASI NOMOR HP
-  // =========================
+  // =====================================================
   const validatePhone = (value) => {
     const digitsOnly = value.replace(/\D/g, "");
 
@@ -49,19 +76,24 @@ export default function TambahDataUser() {
       return "";
     }
 
-    // +62 + nomor
+    // Karena input hanya nomor setelah +62
+    // maka +62 ikut dihitung
     const totalWithCountryCode = `62${digitsOnly}`;
 
     if (totalWithCountryCode.length > 15) {
       return "Maksimum terdiri dari 15 angka termasuk kode negara";
     }
 
+    if (digitsOnly.length < 8) {
+      return "Nomor handphone minimal 8 angka";
+    }
+
     return "";
   };
 
-  // =========================
+  // =====================================================
   // VALIDASI EMAIL
-  // =========================
+  // =====================================================
   const validateEmail = (value) => {
     if (value === "") {
       return "";
@@ -74,9 +106,9 @@ export default function TambahDataUser() {
     return "";
   };
 
-  // =========================
+  // =====================================================
   // VALIDASI PASSWORD
-  // =========================
+  // =====================================================
   const validatePassword = (value) => {
     if (value === "") {
       return "";
@@ -89,10 +121,13 @@ export default function TambahDataUser() {
     return "";
   };
 
-  // =========================
+  // =====================================================
   // VALIDASI KONFIRMASI PASSWORD
-  // =========================
-  const validateConfirmPassword = (value, password) => {
+  // =====================================================
+  const validateConfirmPassword = (
+    value,
+    password
+  ) => {
     if (value === "") {
       return "";
     }
@@ -104,15 +139,15 @@ export default function TambahDataUser() {
     return "";
   };
 
-  // =========================
+  // =====================================================
   // HANDLE CHANGE
-  // =========================
+  // =====================================================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // =========================
+    // ===================================================
     // NOMOR HANDPHONE
-    // =========================
+    // ===================================================
     if (name === "noHandphone") {
       const digitsOnly = value.replace(/\D/g, "");
 
@@ -123,15 +158,16 @@ export default function TambahDataUser() {
 
       setErrors((prev) => ({
         ...prev,
-        noHandphone: validatePhone(digitsOnly),
+        noHandphone:
+          validatePhone(digitsOnly),
       }));
 
       return;
     }
 
-    // =========================
+    // ===================================================
     // EMAIL
-    // =========================
+    // ===================================================
     if (name === "email") {
       setFormData((prev) => ({
         ...prev,
@@ -146,9 +182,9 @@ export default function TambahDataUser() {
       return;
     }
 
-    // =========================
+    // ===================================================
     // PASSWORD
-    // =========================
+    // ===================================================
     if (name === "password") {
       setFormData((prev) => ({
         ...prev,
@@ -157,19 +193,22 @@ export default function TambahDataUser() {
 
       setErrors((prev) => ({
         ...prev,
-        password: validatePassword(value),
-        confirmPassword: validateConfirmPassword(
-          formData.confirmPassword,
-          value
-        ),
+        password:
+          validatePassword(value),
+
+        confirmPassword:
+          validateConfirmPassword(
+            formData.confirmPassword,
+            value
+          ),
       }));
 
       return;
     }
 
-    // =========================
+    // ===================================================
     // CONFIRM PASSWORD
-    // =========================
+    // ===================================================
     if (name === "confirmPassword") {
       setFormData((prev) => ({
         ...prev,
@@ -178,58 +217,60 @@ export default function TambahDataUser() {
 
       setErrors((prev) => ({
         ...prev,
-        confirmPassword: validateConfirmPassword(
-          value,
-          formData.password
-        ),
+        confirmPassword:
+          validateConfirmPassword(
+            value,
+            formData.password
+          ),
       }));
 
       return;
     }
 
-    // =========================
-    // INPUT LAINNYA
-    // =========================
+    // ===================================================
+    // INPUT LAIN
+    // ===================================================
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  // =========================
+  // =====================================================
   // CLEAR FIELD
-  // =========================
+  // =====================================================
   const clearField = (name) => {
     setFormData((prev) => ({
       ...prev,
       [name]: "",
     }));
 
-    if (errors[name] !== undefined) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   };
 
-  // =========================
+  // =====================================================
   // FORMAT TANGGAL
-  // YYYY-MM-DD → DD-MM-YYYY
-  // =========================
+  // YYYY-MM-DD
+  // =>
+  // DD-MM-YYYY
+  // =====================================================
   const formatTanggalLahir = (isoDate) => {
     if (!isoDate) {
       return "";
     }
 
-    const [year, month, day] = isoDate.split("-");
+    const [year, month, day] =
+      isoDate.split("-");
 
     return `${day}-${month}-${year}`;
   };
 
-  // =========================
+  // =====================================================
   // CEK FORM VALID
-  // =========================
+  // =====================================================
   const isFormValid = () => {
     return (
       formData.nama.trim() !== "" &&
@@ -242,21 +283,29 @@ export default function TambahDataUser() {
       !errors.noHandphone &&
       !errors.email &&
       !errors.password &&
-      !errors.confirmPassword
+      !errors.confirmPassword &&
+      formData.password ===
+        formData.confirmPassword
     );
   };
 
-  // =========================
-  // SUBMIT
-  // =========================
+  // =====================================================
+  // HANDLE SUBMIT
+  // =====================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // =========================
-    // VALIDASI ULANG
-    // =========================
+    if (loading) {
+      return;
+    }
+
+    // ===================================================
+    // VALIDASI
+    // ===================================================
     const phoneError =
-      validatePhone(formData.noHandphone) ||
+      validatePhone(
+        formData.noHandphone
+      ) ||
       (formData.noHandphone === ""
         ? "No. Handphone wajib diisi"
         : "");
@@ -268,7 +317,9 @@ export default function TambahDataUser() {
         : "");
 
     const passwordError =
-      validatePassword(formData.password) ||
+      validatePassword(
+        formData.password
+      ) ||
       (formData.password === ""
         ? "Kata sandi wajib diisi"
         : "");
@@ -282,13 +333,18 @@ export default function TambahDataUser() {
         ? "Konfirmasi kata sandi wajib diisi"
         : "");
 
-    const namaError = !formData.nama.trim();
-    const tanggalError = !formData.tanggalLahir;
-    const roleError = !formData.role;
+    const namaError =
+      !formData.nama.trim();
 
-    // =========================
+    const tanggalError =
+      !formData.tanggalLahir;
+
+    const roleError =
+      !formData.role;
+
+    // ===================================================
     // JIKA VALIDASI GAGAL
-    // =========================
+    // ===================================================
     if (
       phoneError ||
       emailError ||
@@ -302,7 +358,8 @@ export default function TambahDataUser() {
         noHandphone: phoneError,
         email: emailError,
         password: passwordError,
-        confirmPassword: confirmPasswordError,
+        confirmPassword:
+          confirmPasswordError,
       });
 
       Swal.fire({
@@ -315,58 +372,121 @@ export default function TambahDataUser() {
       return;
     }
 
-    // =========================
-    // KIRIM KE BACKEND
-    // =========================
-    try {
-      const dataUser = {
-        title: formData.title,
-        nama: formData.nama.trim(),
-        noHandphone: formData.noHandphone,
-        email: formData.email.trim(),
-        tanggalLahir: formatTanggalLahir(
+    // ===================================================
+    // DATA USER
+    // ===================================================
+    const dataUser = {
+      title: formData.title,
+
+      nama: formData.nama.trim(),
+
+      noHandphone:
+        formData.noHandphone,
+
+      email:
+        formData.email.trim(),
+
+      tanggalLahir:
+        formatTanggalLahir(
           formData.tanggalLahir
         ),
-        role: formData.role,
-        password: formData.password,
-        status: "active",
-        alasanNonAktif: "",
-      };
 
-      console.log("Data yang dikirim:", dataUser);
+      role: formData.role,
 
-      const result = await createUser(dataUser);
+      password:
+        formData.password,
 
-      console.log("Response backend:", result);
+      status: "active",
 
-      // =========================
+      alasanNonAktif: "",
+    };
+
+    // ===================================================
+    // DEBUG
+    // ===================================================
+    console.log(
+      "================================="
+    );
+
+    console.log(
+      "DATA USER YANG DIKIRIM:"
+    );
+
+    console.log(dataUser);
+
+    console.log(
+      "================================="
+    );
+
+    // ===================================================
+    // KIRIM KE BACKEND
+    // ===================================================
+    try {
+      setLoading(true);
+
+      // PENTING:
+      // Gunakan tambahDataUser()
+      // BUKAN createUser()
+      const result =
+        await tambahDataUser(
+          dataUser
+        );
+
+      console.log(
+        "RESPONSE BACKEND:"
+      );
+
+      console.log(result);
+
+      // =================================================
       // BERHASIL
-      // =========================
+      // =================================================
       await Swal.fire({
         icon: "success",
-        title: "Data berhasil ditambah",
-        text: "User berhasil disimpan ke database.",
+        title: "Berhasil!",
+        text: "Data user berhasil ditambahkan.",
         confirmButtonColor: "#0B2B8E",
       });
 
-      navigate("/user-management");
-    } catch (error) {
-      console.error("Error tambah user:", error);
+      // =================================================
+      // KEMBALI KE USER MANAGEMENT
+      // =================================================
+      navigate(
+        "/user-management"
+      );
 
-      // =========================
-      // ERROR DARI AXIOS
-      // =========================
+    } catch (error) {
+      console.error(
+        "================================="
+      );
+
+      console.error(
+        "ERROR TAMBAH DATA USER:"
+      );
+
+      console.error(error);
+
+      console.error(
+        "================================="
+      );
+
+      // =================================================
+      // DEFAULT ERROR
+      // =================================================
       let errorMessage =
         "Tidak dapat terhubung ke server.";
 
+      // =================================================
+      // SERVER MEMBERIKAN RESPONSE
+      // =================================================
       if (error.response) {
         console.error(
-          "Status:",
+          "STATUS:",
           error.response.status
         );
 
         console.error(
-          "Data:",
+          "DATA:",
           error.response.data
         );
 
@@ -375,21 +495,37 @@ export default function TambahDataUser() {
           error.response.data?.error ||
           error.message ||
           "Gagal menambahkan user.";
-      } else if (error.request) {
+      }
+
+      // =================================================
+      // REQUEST TERKIRIM TAPI TIDAK ADA RESPONSE
+      // =================================================
+      else if (error.request) {
         errorMessage =
           "Server tidak memberikan response. Periksa koneksi backend.";
-      } else {
+      }
+
+      // =================================================
+      // ERROR LAIN
+      // =================================================
+      else {
         errorMessage =
           error.message ||
           "Terjadi kesalahan.";
       }
 
+      // =================================================
+      // TAMPILKAN ERROR
+      // =================================================
       Swal.fire({
         icon: "error",
         title: "Gagal",
         text: errorMessage,
         confirmButtonColor: "#0B2B8E",
       });
+
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -413,6 +549,10 @@ export default function TambahDataUser() {
             "0 8px 30px rgba(16,24,40,0.08)",
         }}
       >
+
+        {/* =================================================
+            JUDUL
+        ================================================= */}
         <h5 className="fw-bold text-center mb-4">
           Buat User
         </h5>
@@ -421,63 +561,78 @@ export default function TambahDataUser() {
           onSubmit={handleSubmit}
           noValidate
         >
-          {/* =========================
+
+          {/* =================================================
               TITLE
-          ========================= */}
+          ================================================= */}
           <div className="mb-3">
+
             <label className="form-label fw-semibold small">
               Title
             </label>
 
             <div className="d-flex gap-4">
-              {TITLE_OPTIONS.map((opt) => (
-                <div
-                  className="form-check"
-                  key={opt.value}
-                >
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="title"
-                    id={`title-${opt.value}`}
-                    value={opt.value}
-                    checked={
-                      formData.title === opt.value
-                    }
-                    onChange={handleChange}
-                  />
 
-                  <label
-                    className="form-check-label small"
-                    htmlFor={`title-${opt.value}`}
+              {TITLE_OPTIONS.map(
+                (opt) => (
+                  <div
+                    className="form-check"
+                    key={opt.value}
                   >
-                    {opt.label}
-                  </label>
-                </div>
-              ))}
+
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="title"
+                      id={`title-${opt.value}`}
+                      value={opt.value}
+                      checked={
+                        formData.title ===
+                        opt.value
+                      }
+                      onChange={
+                        handleChange
+                      }
+                    />
+
+                    <label
+                      className="form-check-label small"
+                      htmlFor={`title-${opt.value}`}
+                    >
+                      {opt.label}
+                    </label>
+
+                  </div>
+                )
+              )}
+
             </div>
           </div>
 
-          {/* =========================
+          {/* =================================================
               NAMA
-          ========================= */}
+          ================================================= */}
           <div className="mb-3">
+
             <label className="form-label fw-semibold small">
               Nama Lengkap
             </label>
 
             <div className="position-relative">
+
               <input
                 type="text"
                 className="form-control"
                 style={{
                   borderRadius: "8px",
-                  paddingRight: "32px",
+                  paddingRight: "40px",
                 }}
                 name="nama"
                 placeholder="Masukkan Nama Lengkap"
                 value={formData.nama}
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
               />
 
               {formData.nama && (
@@ -489,19 +644,23 @@ export default function TambahDataUser() {
                     background: "none",
                   }}
                   onClick={() =>
-                    clearField("nama")
+                    clearField(
+                      "nama"
+                    )
                   }
                 >
                   <i className="bi bi-x-lg"></i>
                 </button>
               )}
+
             </div>
           </div>
 
-          {/* =========================
-              NO HANDPHONE
-          ========================= */}
+          {/* =================================================
+              NOMOR HANDPHONE
+          ================================================= */}
           <div className="mb-3">
+
             <label className="form-label fw-semibold small">
               No. Handphone
             </label>
@@ -512,20 +671,25 @@ export default function TambahDataUser() {
                 gap: "8px",
               }}
             >
+
+              {/* +62 */}
               <div
                 className="d-flex align-items-center px-2"
                 style={{
                   border:
                     "1px solid #D0D5DD",
                   borderRadius: "8px",
-                  backgroundColor: "#F9FAFB",
+                  backgroundColor:
+                    "#F9FAFB",
                   minWidth: "78px",
                 }}
               >
+
                 <span
                   className="me-1"
                   style={{
-                    display: "inline-block",
+                    display:
+                      "inline-block",
                     width: "18px",
                     height: "13px",
                     background:
@@ -534,14 +698,17 @@ export default function TambahDataUser() {
                       "1px solid #E4E7EC",
                     borderRadius: "2px",
                   }}
-                ></span>
+                />
 
                 <span className="small text-muted">
                   +62
                 </span>
+
               </div>
 
+              {/* INPUT NOMOR */}
               <div className="position-relative flex-grow-1">
+
                 <input
                   type="text"
                   inputMode="numeric"
@@ -552,12 +719,16 @@ export default function TambahDataUser() {
                   }`}
                   style={{
                     borderRadius: "8px",
-                    paddingRight: "32px",
+                    paddingRight: "40px",
                   }}
                   name="noHandphone"
                   placeholder="Masukan Nomer"
-                  value={formData.noHandphone}
-                  onChange={handleChange}
+                  value={
+                    formData.noHandphone
+                  }
+                  onChange={
+                    handleChange
+                  }
                 />
 
                 {formData.noHandphone && (
@@ -577,25 +748,31 @@ export default function TambahDataUser() {
                     <i className="bi bi-x-lg"></i>
                   </button>
                 )}
+
               </div>
             </div>
 
             {errors.noHandphone && (
               <div className="text-danger small mt-1">
-                {errors.noHandphone}
+                {
+                  errors.noHandphone
+                }
               </div>
             )}
+
           </div>
 
-          {/* =========================
+          {/* =================================================
               EMAIL
-          ========================= */}
+          ================================================= */}
           <div className="mb-3">
+
             <label className="form-label fw-semibold small">
               Email
             </label>
 
             <div className="position-relative">
+
               <input
                 type="email"
                 className={`form-control ${
@@ -605,12 +782,14 @@ export default function TambahDataUser() {
                 }`}
                 style={{
                   borderRadius: "8px",
-                  paddingRight: "32px",
+                  paddingRight: "40px",
                 }}
                 name="email"
                 placeholder="Masukan Email"
                 value={formData.email}
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
               />
 
               {formData.email && (
@@ -622,12 +801,15 @@ export default function TambahDataUser() {
                     background: "none",
                   }}
                   onClick={() =>
-                    clearField("email")
+                    clearField(
+                      "email"
+                    )
                   }
                 >
                   <i className="bi bi-x-lg"></i>
                 </button>
               )}
+
             </div>
 
             {errors.email && (
@@ -635,12 +817,14 @@ export default function TambahDataUser() {
                 {errors.email}
               </div>
             )}
+
           </div>
 
-          {/* =========================
+          {/* =================================================
               TANGGAL LAHIR
-          ========================= */}
+          ================================================= */}
           <div className="mb-3">
+
             <label className="form-label fw-semibold small">
               Tanggal Lahir
             </label>
@@ -652,15 +836,21 @@ export default function TambahDataUser() {
                 borderRadius: "8px",
               }}
               name="tanggalLahir"
-              value={formData.tanggalLahir}
-              onChange={handleChange}
+              value={
+                formData.tanggalLahir
+              }
+              onChange={
+                handleChange
+              }
             />
+
           </div>
 
-          {/* =========================
+          {/* =================================================
               ROLE
-          ========================= */}
+          ================================================= */}
           <div className="mb-3">
+
             <label className="form-label fw-semibold small">
               Roles
             </label>
@@ -672,9 +862,15 @@ export default function TambahDataUser() {
               }}
               name="role"
               value={formData.role}
-              onChange={handleChange}
+              onChange={
+                handleChange
+              }
             >
-              <option value="" disabled>
+
+              <option
+                value=""
+                disabled
+              >
                 Pilih Role
               </option>
 
@@ -685,20 +881,24 @@ export default function TambahDataUser() {
               <option value="Member">
                 Member
               </option>
+
             </select>
+
           </div>
 
           <hr className="my-4" />
 
-          {/* =========================
+          {/* =================================================
               PASSWORD
-          ========================= */}
+          ================================================= */}
           <div className="mb-3">
+
             <label className="form-label fw-semibold small">
               Kata Sandi
             </label>
 
             <div className="position-relative">
+
               <input
                 type="password"
                 className={`form-control ${
@@ -708,12 +908,16 @@ export default function TambahDataUser() {
                 }`}
                 style={{
                   borderRadius: "8px",
-                  paddingRight: "32px",
+                  paddingRight: "40px",
                 }}
                 name="password"
                 placeholder="Masukkan Kata Sandi"
-                value={formData.password}
-                onChange={handleChange}
+                value={
+                  formData.password
+                }
+                onChange={
+                  handleChange
+                }
               />
 
               {formData.password && (
@@ -725,12 +929,15 @@ export default function TambahDataUser() {
                     background: "none",
                   }}
                   onClick={() =>
-                    clearField("password")
+                    clearField(
+                      "password"
+                    )
                   }
                 >
                   <i className="bi bi-x-lg"></i>
                 </button>
               )}
+
             </div>
 
             {errors.password && (
@@ -738,17 +945,20 @@ export default function TambahDataUser() {
                 {errors.password}
               </div>
             )}
+
           </div>
 
-          {/* =========================
-              CONFIRM PASSWORD
-          ========================= */}
+          {/* =================================================
+              KONFIRMASI PASSWORD
+          ================================================= */}
           <div className="mb-4">
+
             <label className="form-label fw-semibold small">
               Konfirmasi Kata Sandi
             </label>
 
             <div className="position-relative">
+
               <input
                 type="password"
                 className={`form-control ${
@@ -758,14 +968,16 @@ export default function TambahDataUser() {
                 }`}
                 style={{
                   borderRadius: "8px",
-                  paddingRight: "32px",
+                  paddingRight: "40px",
                 }}
                 name="confirmPassword"
                 placeholder="Masukkan Ulang Kata Sandi"
                 value={
                   formData.confirmPassword
                 }
-                onChange={handleChange}
+                onChange={
+                  handleChange
+                }
               />
 
               {formData.confirmPassword && (
@@ -785,25 +997,36 @@ export default function TambahDataUser() {
                   <i className="bi bi-x-lg"></i>
                 </button>
               )}
+
             </div>
 
             {errors.confirmPassword && (
               <div className="text-danger small mt-1">
-                {errors.confirmPassword}
+                {
+                  errors.confirmPassword
+                }
               </div>
             )}
+
           </div>
 
-          {/* =========================
+          {/* =================================================
               SIMPAN
-          ========================= */}
+          ================================================= */}
           <button
             type="submit"
+            disabled={
+              loading ||
+              !isFormValid()
+            }
             className="btn w-100 fw-semibold text-white text-uppercase"
             style={{
-              backgroundColor: isFormValid()
-                ? "#0B2B8E"
-                : "#A0A3BD",
+              backgroundColor:
+                loading
+                  ? "#A0A3BD"
+                  : isFormValid()
+                  ? "#0B2B8E"
+                  : "#A0A3BD",
               borderRadius: "999px",
               padding: "12px 0",
               letterSpacing: "0.5px",
@@ -812,30 +1035,35 @@ export default function TambahDataUser() {
                 "background-color 0.2s ease",
             }}
           >
-            Simpan Data
+            {loading
+              ? "Menyimpan..."
+              : "Simpan Data"}
           </button>
 
-          {/* =========================
+          {/* =================================================
               KEMBALI
-          ========================= */}
+          ================================================= */}
           <button
             type="button"
+            disabled={loading}
             onClick={() =>
-              navigate("/user-management")
+              navigate(
+                "/user-management"
+              )
             }
             className="btn w-100 fw-semibold text-white text-uppercase mt-2"
             style={{
-              backgroundColor: "#77797c",
+              backgroundColor:
+                "#77797c",
               borderRadius: "999px",
               padding: "12px 0",
               letterSpacing: "0.5px",
               border: "none",
-              transition:
-                "background-color 0.2s ease",
             }}
           >
             Kembali
           </button>
+
         </form>
       </div>
     </div>
