@@ -7,7 +7,7 @@ import {
   getUsers,
   updateUser,
   deleteUser,
-} from "../api/userApi";
+} from "../../api/userApi";
 
 // =========================
 // MONTH
