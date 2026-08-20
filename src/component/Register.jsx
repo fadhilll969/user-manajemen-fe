@@ -11,6 +11,7 @@ export default function Register() {
     const [nama, setNama] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
     const [showPassword, setShowPassword] = useState(false);
 
     const [errors, setErrors] = useState({
@@ -34,12 +35,14 @@ export default function Register() {
     };
 
     const validateEmail = (value) => {
-        if (value.trim() === "") {
+        const emailValue = value.trim();
+
+        if (emailValue === "") {
             return "Email wajib diisi";
         }
 
-        if (!EMAIL_REGEX.test(value.trim())) {
-            return "Masukan email Gmail yang valid";
+        if (!EMAIL_REGEX.test(emailValue)) {
+            return "Masukkan email Gmail yang valid";
         }
 
         return "";
@@ -58,7 +61,7 @@ export default function Register() {
     };
 
     // =========================
-    // HANDLE INPUT
+    // INPUT
     // =========================
 
     const handleNamaChange = (e) => {
@@ -171,7 +174,7 @@ export default function Register() {
     };
 
     // =========================
-    // CLEAR INPUT
+    // CLEAR
     // =========================
 
     const clearNama = () => {
@@ -218,15 +221,8 @@ export default function Register() {
                         boxShadow: "0 8px 30px rgba(16,24,40,0.08)",
                     }}
                 >
-                    <h5 className="fw-bold text-center mb-1">
-                        Buat Akun Baru
-                    </h5>
-
-                    <p className="text-muted text-center small mb-4">
-                        Daftarkan akun untuk mulai menggunakan sistem
-                    </p>
-
                     <form onSubmit={handleSubmit} noValidate>
+
                         {/* NAMA */}
                         <div className="form-floating position-relative mb-1">
                             <input
@@ -236,12 +232,12 @@ export default function Register() {
                                 }`}
                                 id="registerNama"
                                 placeholder="Nama"
+                                value={nama}
+                                onChange={handleNamaChange}
                                 style={{
                                     borderRadius: "8px",
                                     paddingRight: "34px",
                                 }}
-                                value={nama}
-                                onChange={handleNamaChange}
                             />
 
                             <label
@@ -284,12 +280,12 @@ export default function Register() {
                                 }`}
                                 id="registerEmail"
                                 placeholder="Email"
+                                value={email}
+                                onChange={handleEmailChange}
                                 style={{
                                     borderRadius: "8px",
                                     paddingRight: "34px",
                                 }}
-                                value={email}
-                                onChange={handleEmailChange}
                             />
 
                             <label
@@ -332,22 +328,13 @@ export default function Register() {
                                 }`}
                                 id="registerPassword"
                                 placeholder="Kata Sandi"
+                                value={password}
+                                onChange={handlePasswordChange}
                                 style={{
                                     borderRadius: "8px",
                                     paddingRight: "45px",
                                 }}
-                                value={password}
-                                onChange={handlePasswordChange}
                             />
-
-                            <style>
-                                {`
-                                    #registerPassword::-ms-reveal,
-                                    #registerPassword::-ms-clear {
-                                        display: none;
-                                    }
-                                `}
-                            </style>
 
                             <label
                                 htmlFor="registerPassword"
@@ -386,24 +373,25 @@ export default function Register() {
                             </div>
                         )}
 
-                        {/* LOGIN LINK */}
+                        {/* LOGIN */}
                         <div className="text-end mb-3 mt-3">
-                            <a
-                                href="/"
-                                className="small text-decoration-none fw-semibold"
+                            <button
+                                type="button"
+                                className="btn btn-link p-0 small text-decoration-none fw-semibold"
                                 style={{
                                     color: "#0B2B8E",
                                 }}
+                                onClick={() => navigate("/")}
                             >
                                 Sudah Memiliki Akun?
-                            </a>
+                            </button>
                         </div>
 
-                        {/* REGISTER BUTTON */}
+                        {/* REGISTER */}
                         <button
                             type="submit"
                             className="btn w-100 fw-semibold text-white text-uppercase"
-                            disabled={submitting}
+                            disabled={submitting || !isFormValid()}
                             style={{
                                 backgroundColor:
                                     isFormValid() && !submitting
@@ -413,8 +401,6 @@ export default function Register() {
                                 padding: "12px 0",
                                 letterSpacing: "0.5px",
                                 border: "none",
-                                transition:
-                                    "background-color 0.2s ease",
                             }}
                         >
                             {submitting ? "Memproses..." : "Daftar"}
@@ -436,7 +422,7 @@ export default function Register() {
                                     color: "#0B2B8E",
                                 }}
                             >
-                                Syarat &amp; Ketentuan
+                                Syarat & Ketentuan
                             </a>{" "}
                             dan{" "}
                             <a
@@ -452,7 +438,6 @@ export default function Register() {
                         </p>
                     </form>
 
-                    {/* COPYRIGHT */}
                     <p
                         className="text-center text-muted mt-4 mb-0"
                         style={{
