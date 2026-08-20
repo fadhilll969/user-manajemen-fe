@@ -4,25 +4,7 @@ const API_URL =
   "https://user-manajemen-be-production.up.railway.app";
 
 // =========================
-// LOGIN
-// =========================
-
-export const loginUser = async (data) => {
-  const response = await axios.post(
-    `${API_URL}/login`,
-    data,
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  return response.data;
-};
-
-// =========================
-// TAMBAH USER
+// REGISTER
 // =========================
 
 export const createUser = async (data) => {
@@ -39,9 +21,28 @@ export const createUser = async (data) => {
   return response.data;
 };
 
+// =========================
+// LOGIN
+// =========================
+
+export const loginUser = async (data) => {
+  const response = await axios.post(
+    `${API_URL}/login`,
+    data,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  
+// =========================
+// TAMBAH DATA USER
+// =========================
+
 export const tambahDataUser = async (data) => {
   const response = await axios.post(
-    `${API_URL}/tambah-data-management`,
+    `${API_URL}/users`,
     data,
     {
       headers: {
@@ -53,3 +54,6 @@ export const tambahDataUser = async (data) => {
   return response.data;
 };
 
+
+  return response.data;
+};
