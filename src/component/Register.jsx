@@ -21,13 +21,22 @@ export default function Register() {
 
     const [submitting, setSubmitting] = useState(false);
 
+    // =========================
+    // VALIDASI
+    // =========================
+
     const validateNama = (value) => {
-        if (value.trim() === "") return "Nama wajib diisi";
+        if (value.trim() === "") {
+            return "Nama wajib diisi";
+        }
+
         return "";
     };
 
     const validateEmail = (value) => {
-        if (value.trim() === "") return "Email wajib diisi";
+        if (value.trim() === "") {
+            return "Email wajib diisi";
+        }
 
         if (!EMAIL_REGEX.test(value.trim())) {
             return "Masukan email Gmail yang valid";
@@ -37,7 +46,9 @@ export default function Register() {
     };
 
     const validatePassword = (value) => {
-        if (value.trim() === "") return "Kata sandi wajib diisi";
+        if (value.trim() === "") {
+            return "Kata sandi wajib diisi";
+        }
 
         if (value.length < 8) {
             return "Kata sandi minimal 8 karakter";
@@ -46,8 +57,13 @@ export default function Register() {
         return "";
     };
 
+    // =========================
+    // HANDLE INPUT
+    // =========================
+
     const handleNamaChange = (e) => {
         const value = e.target.value;
+
         setNama(value);
 
         setErrors((prev) => ({
@@ -58,6 +74,7 @@ export default function Register() {
 
     const handleEmailChange = (e) => {
         const value = e.target.value;
+
         setEmail(value);
 
         setErrors((prev) => ({
@@ -68,6 +85,7 @@ export default function Register() {
 
     const handlePasswordChange = (e) => {
         const value = e.target.value;
+
         setPassword(value);
 
         setErrors((prev) => ({
@@ -75,6 +93,10 @@ export default function Register() {
             password: validatePassword(value),
         }));
     };
+
+    // =========================
+    // CEK FORM
+    // =========================
 
     const isFormValid = () => {
         return (
@@ -86,6 +108,10 @@ export default function Register() {
             !errors.password
         );
     };
+
+    // =========================
+    // REGISTER
+    // =========================
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -100,6 +126,7 @@ export default function Register() {
                 email: emailError,
                 password: passwordError,
             });
+
             return;
         }
 
@@ -143,6 +170,10 @@ export default function Register() {
         }
     };
 
+    // =========================
+    // CLEAR INPUT
+    // =========================
+
     const clearNama = () => {
         setNama("");
 
@@ -160,6 +191,10 @@ export default function Register() {
             email: "",
         }));
     };
+
+    // =========================
+    // UI
+    // =========================
 
     return (
         <div
@@ -300,19 +335,19 @@ export default function Register() {
                                 style={{
                                     borderRadius: "8px",
                                     paddingRight: "45px",
-                                    WebkitAppearance: "none",
-                                    MozAppearance: "textfield",
                                 }}
                                 value={password}
                                 onChange={handlePasswordChange}
                             />
 
-                            <style>{`
-                                #registerPassword::-ms-reveal,
-                                #registerPassword::-ms-clear {
-                                    display: none;
-                                }
-                            `}</style>
+                            <style>
+                                {`
+                                    #registerPassword::-ms-reveal,
+                                    #registerPassword::-ms-clear {
+                                        display: none;
+                                    }
+                                `}
+                            </style>
 
                             <label
                                 htmlFor="registerPassword"
@@ -355,7 +390,7 @@ export default function Register() {
                         <div className="text-end mb-3 mt-3">
                             <a
                                 href="/"
-                                className="small text-dark text-decoration-none fw-semibold"
+                                className="small text-decoration-none fw-semibold"
                                 style={{
                                     color: "#0B2B8E",
                                 }}
