@@ -22,22 +22,19 @@ export const createUser = async (data) => {
 };
 
 // =========================
-// LOGIN
+// GET SEMUA USER
 // =========================
 
-export const loginUser = async (data) => {
-  const response = await axios.post(
-    `${API_URL}/login`,
-    data,
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
+export const getUsers = async () => {
+  const response = await axios.get(
+    `${API_URL}/users`
   );
-  
+
+  return response.data;
+};
+
 // =========================
-// TAMBAH DATA USER
+// TAMBAH USER
 // =========================
 
 export const tambahDataUser = async (data) => {
@@ -54,6 +51,62 @@ export const tambahDataUser = async (data) => {
   return response.data;
 };
 
+// =========================
+// GET USER BY ID
+// =========================
+
+export const getUser = async (id) => {
+  const response = await axios.get(
+    `${API_URL}/users/${id}`
+  );
+
+  return response.data;
+};
+
+// =========================
+// UPDATE USER
+// =========================
+
+export const updateUser = async (id, data) => {
+  const response = await axios.put(
+    `${API_URL}/users/${id}`,
+    data,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+// =========================
+// DELETE USER
+// =========================
+
+export const deleteUser = async (id) => {
+  const response = await axios.delete(
+    `${API_URL}/users/${id}`
+  );
+
+  return response.data;
+};
+
+// =========================
+// LOGIN
+// =========================
+
+export const loginUser = async (data) => {
+  const response = await axios.post(
+    `${API_URL}/login`,
+    data,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   return response.data;
 };

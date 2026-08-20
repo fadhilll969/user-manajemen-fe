@@ -2,49 +2,134 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 
-const API_URL = "http://127.0.0.1:8000";
+import { updateUser } from "../api/userapi";
+// =====================================================
+// TITLE OPTIONS
+// =====================================================
 
 const TITLE_OPTIONS = [
-    { value: "Tn", label: "Tuan" },
-    { value: "Ny", label: "Nyonya" },
-    { value: "Nn", label: "Nona" },
+    {
+        value: "Tn",
+        label: "Tuan",
+    },
+    {
+        value: "Ny",
+        label: "Nyonya",
+    },
+    {
+        value: "Nn",
+        label: "Nona",
+    },
 ];
 
-const EMAIL_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@gmail\.com$/;
+// =====================================================
+// VALIDASI EMAIL
+// Gmail saja
+// =====================================================
+
+const EMAIL_REGEX =
+    /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@gmail\.com$/;
+
+// =====================================================
+// VALIDASI PASSWORD
+// Minimal 8 karakter
+// =====================================================
+
 const PASSWORD_REGEX = /^.{8,}$/;
 
+// =====================================================
+// FORMAT TANGGAL
+// DD-MM-YYYY -> YYYY-MM-DD
+// =====================================================
+
 function toInputDateFormat(value) {
-    if (!value) return "";
+    if (!value) {
+        return "";
+    }
+
     const parts = value.split("-");
-    if (parts.length === 3 && parts[0].length === 2) {
+
+    if (
+        parts.length === 3 &&
+        parts[0].length === 2
+    ) {
         const [day, month, year] = parts;
+
         return `${year}-${month}-${day}`;
     }
+
     return value;
 }
+
+// =====================================================
+// COMPONENT
+// =====================================================
 
 export default function EditDataUser() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const userToEdit = location.state?.user || null;
+    // =====================================================
+    // USER YANG AKAN DIEDIT
+    // =====================================================
+
+    const userToEdit =
+        location.state?.user || null;
+
+    // =====================================================
+    // FORM DATA
+    // =====================================================
 
     const [formData, setFormData] = useState({
         title: userToEdit?.title || "Tn",
+
         nama: userToEdit?.nama || "",
-        noHandphone: userToEdit?.noHandphone?.replace(/\D/g, "").replace(/^62/, "") || "",
+
+        noHandphone:
+            userToEdit?.noHandphone
+                ?.replace(/\D/g, "")
+                .replace(/^62/, "") || "",
+
         email: userToEdit?.email || "",
-        tanggalLahir: toInputDateFormat(userToEdit?.tanggalLahir) || "",
+
+        tanggalLahir:
+            toInputDateFormat(
+                userToEdit?.tanggalLahir
+            ) || "",
+
         role: userToEdit?.role || "",
-        status: userToEdit?.status || "active",
-        alasanNonAktif: userToEdit?.alasanNonAktif || "",
+
+        status:
+            userToEdit?.status || "active",
+
+        alasanNonAktif:
+            userToEdit?.alasanNonAktif || "",
     });
 
-    const [ubahSandi, setUbahSandi] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+    // =====================================================
+    // PASSWORD
+    // =====================================================
+
+    const [ubahSandi, setUbahSandi] =
+        useState(false);
+
+    const [showPassword, setShowPassword] =
+        useState(false);
+
+    const [
+        showConfirmPassword,
+        setShowConfirmPassword,
+    ] = useState(false);
+
+    const [password, setPassword] =
+        useState("");
+
+    const [confirmPassword, setConfirmPassword] =
+        useState("");
+
+    // =====================================================
+    // ERROR
+    // =====================================================
 
     const [errors, setErrors] = useState({
         noHandphone: "",
@@ -54,98 +139,273 @@ export default function EditDataUser() {
         alasanNonAktif: "",
     });
 
-    const [submitting, setSubmitting] = useState(false);
-    const [submitError, setSubmitError] = useState("");
+    // =====================================================
+    // SUBMIT
+    // =====================================================
+
+    const [submitting, setSubmitting] =
+        useState(false);
+
+    const [submitError, setSubmitError] =
+        useState("");
+
+    // =====================================================
+    // VALIDASI NOMOR HP
+    // =====================================================
 
     const validatePhone = (value) => {
-        const digitsOnly = value.replace(/\D/g, "");
-        const totalWithCountryCode = `62${digitsOnly}`;
-        if (digitsOnly === "") return "";
-        if (totalWithCountryCode.length > 15) {
+        const digitsOnly =
+            value.replace(/\D/g, "");
+
+        if (digitsOnly === "") {
+            return "";
+        }
+
+        const totalWithCountryCode =
+            `62${digitsOnly}`;
+
+        if (
+            totalWithCountryCode.length > 15
+        ) {
             return "Maksimum terdiri dari 15 angka termasuk kode negara";
         }
+
+        if (digitsOnly.length < 8) {
+            return "Nomor handphone minimal 8 angka";
+        }
+
         return "";
     };
+
+    // =====================================================
+    // VALIDASI EMAIL
+    // =====================================================
 
     const validateEmail = (value) => {
-        if (value === "") return "";
-        if (!EMAIL_REGEX.test(value)) {
-            return "Masukkan email yang valid";
+        if (value === "") {
+            return "";
         }
+
+        if (!EMAIL_REGEX.test(value)) {
+            return "Masukkan email Gmail yang valid";
+        }
+
         return "";
     };
 
+    // =====================================================
+    // VALIDASI PASSWORD
+    // =====================================================
+
     const validatePassword = (value) => {
-        if (value === "") return "";
+        if (value === "") {
+            return "";
+        }
+
         if (!PASSWORD_REGEX.test(value)) {
             return "Kata sandi minimal 8 karakter";
         }
+
         return "";
     };
 
-    const validateConfirmPassword = (value, pass) => {
-        if (value === "") return "";
+    // =====================================================
+    // VALIDASI CONFIRM PASSWORD
+    // =====================================================
+
+    const validateConfirmPassword = (
+        value,
+        pass
+    ) => {
+        if (value === "") {
+            return "";
+        }
+
         if (value !== pass) {
             return "Kata sandi tidak cocok";
         }
+
         return "";
     };
 
+    // =====================================================
+    // HANDLE CHANGE
+    // =====================================================
+
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const {
+            name,
+            value,
+        } = e.target;
+
+        // =================================================
+        // NOMOR HP
+        // =================================================
 
         if (name === "noHandphone") {
-            const digitsOnly = value.replace(/\D/g, "");
-            setFormData((prev) => ({ ...prev, noHandphone: digitsOnly }));
-            setErrors((prev) => ({ ...prev, noHandphone: validatePhone(digitsOnly) }));
+            const digitsOnly =
+                value.replace(/\D/g, "");
+
+            setFormData((prev) => ({
+                ...prev,
+                noHandphone:
+                    digitsOnly,
+            }));
+
+            setErrors((prev) => ({
+                ...prev,
+                noHandphone:
+                    validatePhone(
+                        digitsOnly
+                    ),
+            }));
+
             return;
         }
+
+        // =================================================
+        // EMAIL
+        // =================================================
 
         if (name === "email") {
-            setFormData((prev) => ({ ...prev, email: value }));
-            setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
+            setFormData((prev) => ({
+                ...prev,
+                email: value,
+            }));
+
+            setErrors((prev) => ({
+                ...prev,
+                email:
+                    validateEmail(value),
+            }));
+
             return;
         }
 
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        // =================================================
+        // INPUT LAIN
+        // =================================================
+
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
+        // =================================================
+        // ERROR ALASAN NON AKTIF
+        // =================================================
+
+        if (name === "alasanNonAktif") {
+            setErrors((prev) => ({
+                ...prev,
+                alasanNonAktif: "",
+            }));
+        }
     };
+
+    // =====================================================
+    // HANDLE PASSWORD
+    // =====================================================
 
     const handlePasswordChange = (e) => {
         const value = e.target.value;
+
         setPassword(value);
+
         setErrors((prev) => ({
             ...prev,
-            password: validatePassword(value),
-            confirmPassword: validateConfirmPassword(confirmPassword, value),
+
+            password:
+                validatePassword(value),
+
+            confirmPassword:
+                validateConfirmPassword(
+                    confirmPassword,
+                    value
+                ),
         }));
     };
 
-    const handleConfirmPasswordChange = (e) => {
+    // =====================================================
+    // HANDLE CONFIRM PASSWORD
+    // =====================================================
+
+    const handleConfirmPasswordChange = (
+        e
+    ) => {
         const value = e.target.value;
+
         setConfirmPassword(value);
+
         setErrors((prev) => ({
             ...prev,
-            confirmPassword: validateConfirmPassword(value, password),
+
+            confirmPassword:
+                validateConfirmPassword(
+                    value,
+                    password
+                ),
         }));
     };
+
+    // =====================================================
+    // CLEAR FIELD
+    // =====================================================
 
     const clearField = (name) => {
-        setFormData((prev) => ({ ...prev, [name]: "" }));
-        if (errors[name] !== undefined) {
-            setErrors((prev) => ({ ...prev, [name]: "" }));
+        setFormData((prev) => ({
+            ...prev,
+            [name]: "",
+        }));
+
+        if (
+            errors[name] !== undefined
+        ) {
+            setErrors((prev) => ({
+                ...prev,
+                [name]: "",
+            }));
         }
     };
 
-    const formatTanggalLahir = (isoDate) => {
-        if (!isoDate) return "";
-        if (isoDate.includes("-") && isoDate.split("-")[0].length === 4) {
-            const [year, month, day] = isoDate.split("-");
+    // =====================================================
+    // FORMAT TANGGAL LAHIR
+    // YYYY-MM-DD -> DD-MM-YYYY
+    // =====================================================
+
+    const formatTanggalLahir = (
+        isoDate
+    ) => {
+        if (!isoDate) {
+            return "";
+        }
+
+        if (
+            isoDate.includes("-") &&
+            isoDate.split("-")[0].length === 4
+        ) {
+            const [
+                year,
+                month,
+                day,
+            ] = isoDate.split("-");
+
             return `${day}-${month}-${year}`;
         }
+
         return isoDate;
     };
 
-    const isNonActive = formData.status === "non-active";
+    // =====================================================
+    // STATUS NON ACTIVE
+    // =====================================================
+
+    const isNonActive =
+        formData.status === "non-active";
+
+    // =====================================================
+    // FORM VALID
+    // =====================================================
 
     const isFormValid = () => {
         const baseValid =
@@ -157,55 +417,135 @@ export default function EditDataUser() {
             !errors.noHandphone &&
             !errors.email;
 
-        const passwordValid = !ubahSandi || (
-            password.trim() !== "" &&
-            confirmPassword.trim() !== "" &&
-            !errors.password &&
-            !errors.confirmPassword
+        const passwordValid =
+            !ubahSandi ||
+            (
+                password.trim() !== "" &&
+                confirmPassword.trim() !== "" &&
+                !errors.password &&
+                !errors.confirmPassword
+            );
+
+        const alasanValid =
+            !isNonActive ||
+            formData.alasanNonAktif.trim() !== "";
+
+        return (
+            baseValid &&
+            passwordValid &&
+            alasanValid
         );
-
-        const alasanValid = !isNonActive || formData.alasanNonAktif.trim() !== "";
-
-        return baseValid && passwordValid && alasanValid;
     };
+
+    // =====================================================
+    // HANDLE SUBMIT
+    // =====================================================
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (submitting) {
+            return;
+        }
+
+        // =================================================
+        // VALIDASI NOMOR HP
+        // =================================================
+
         const phoneError =
-            validatePhone(formData.noHandphone) ||
-            (formData.noHandphone === ""
-                ? "No. Handphone wajib diisi"
-                : "");
+            validatePhone(
+                formData.noHandphone
+            ) ||
+            (
+                formData.noHandphone === ""
+                    ? "No. Handphone wajib diisi"
+                    : ""
+            );
+
+        // =================================================
+        // VALIDASI EMAIL
+        // =================================================
 
         const emailError =
-            validateEmail(formData.email) ||
-            (formData.email === ""
-                ? "Email wajib diisi"
-                : "");
+            validateEmail(
+                formData.email
+            ) ||
+            (
+                formData.email === ""
+                    ? "Email wajib diisi"
+                    : ""
+            );
+
+        // =================================================
+        // VALIDASI PASSWORD
+        // =================================================
 
         let passwordError = "";
         let confirmPasswordError = "";
 
         if (ubahSandi) {
             passwordError =
-                validatePassword(password) ||
-                (password === ""
-                    ? "Kata sandi wajib diisi"
-                    : "");
+                validatePassword(
+                    password
+                ) ||
+                (
+                    password === ""
+                        ? "Kata sandi wajib diisi"
+                        : ""
+                );
 
             confirmPasswordError =
-                validateConfirmPassword(confirmPassword, password) ||
-                (confirmPassword === ""
-                    ? "Konfirmasi kata sandi wajib diisi"
-                    : "");
+                validateConfirmPassword(
+                    confirmPassword,
+                    password
+                ) ||
+                (
+                    confirmPassword === ""
+                        ? "Konfirmasi kata sandi wajib diisi"
+                        : ""
+                );
         }
+
+        // =================================================
+        // VALIDASI ALASAN NON AKTIF
+        // =================================================
 
         const alasanError =
             isNonActive &&
-                formData.alasanNonAktif.trim() === ""
+            formData.alasanNonAktif.trim() === ""
                 ? "Alasan non aktif wajib diisi"
                 : "";
+
+        // =================================================
+        // VALIDASI NAMA
+        // =================================================
+
+        const namaError =
+            !formData.nama.trim()
+                ? "Nama wajib diisi"
+                : "";
+
+        // =================================================
+        // VALIDASI TANGGAL
+        // =================================================
+
+        const tanggalError =
+            !formData.tanggalLahir
+                ? "Tanggal lahir wajib diisi"
+                : "";
+
+        // =================================================
+        // VALIDASI ROLE
+        // =================================================
+
+        const roleError =
+            !formData.role
+                ? "Role wajib dipilih"
+                : "";
+
+        // =================================================
+        // JIKA VALIDASI GAGAL
+        // =================================================
 
         if (
             phoneError ||
@@ -213,27 +553,49 @@ export default function EditDataUser() {
             passwordError ||
             confirmPasswordError ||
             alasanError ||
-            !formData.nama.trim() ||
-            !formData.tanggalLahir ||
-            !formData.role
+            namaError ||
+            tanggalError ||
+            roleError
         ) {
             setErrors({
-                noHandphone: phoneError,
-                email: emailError,
-                password: passwordError,
-                confirmPassword: confirmPasswordError,
-                alasanNonAktif: alasanError,
+                noHandphone:
+                    phoneError,
+
+                email:
+                    emailError,
+
+                password:
+                    passwordError,
+
+                confirmPassword:
+                    confirmPasswordError,
+
+                alasanNonAktif:
+                    alasanError,
+            });
+
+            Swal.fire({
+                icon: "warning",
+                title: "Data belum lengkap",
+                text: "Silakan periksa kembali data yang diisi.",
+                confirmButtonColor:
+                    "#0B2B8E",
             });
 
             return;
         }
+
+        // =================================================
+        // CEK ID USER
+        // =================================================
 
         if (!userToEdit?.id) {
             Swal.fire({
                 icon: "error",
                 title: "Data user tidak ditemukan",
                 text: "ID user tidak tersedia.",
-                confirmButtonColor: "#0B2B8E",
+                confirmButtonColor:
+                    "#0B2B8E",
             });
 
             return;
@@ -243,339 +605,868 @@ export default function EditDataUser() {
         setSubmitError("");
 
         try {
+            // =================================================
+            // DATA YANG DIKIRIM KE BACKEND
+            // =================================================
+
             const bodyData = {
                 title: formData.title,
-                nama: formData.nama.trim(),
-                noHandphone: formData.noHandphone,
-                email: formData.email.trim(),
-                tanggalLahir: formatTanggalLahir(
-                    formData.tanggalLahir
-                ),
-                role: formData.role,
-                status: formData.status,
-                alasanNonAktif: isNonActive
-                    ? formData.alasanNonAktif.trim()
-                    : "",
+
+                nama:
+                    formData.nama.trim(),
+
+                noHandphone:
+                    formData.noHandphone,
+
+                email:
+                    formData.email.trim(),
+
+                tanggalLahir:
+                    formatTanggalLahir(
+                        formData.tanggalLahir
+                    ),
+
+                role:
+                    formData.role,
+
+                status:
+                    formData.status,
+
+                alasanNonAktif:
+                    isNonActive
+                        ? formData.alasanNonAktif.trim()
+                        : "",
             };
 
+            // =================================================
+            // PASSWORD HANYA DIKIRIM JIKA DIUBAH
+            // =================================================
+
             if (ubahSandi) {
-                bodyData.password = password;
+                bodyData.password =
+                    password;
             }
 
-            const response = await fetch(
-                `${API_URL}/users/${userToEdit.id}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(bodyData),
-                }
+            // =================================================
+            // DEBUG
+            // =================================================
+
+            console.log(
+                "================================="
             );
 
-            const result = await response.json();
+            console.log(
+                "ID USER YANG DIUPDATE:"
+            );
 
-            if (!response.ok) {
-                throw new Error(
-                    result.message ||
-                    "Gagal memperbarui data user"
+            console.log(
+                userToEdit.id
+            );
+
+            console.log(
+                "DATA USER YANG DIKIRIM:"
+            );
+
+            console.log(
+                bodyData
+            );
+
+            console.log(
+                "================================="
+            );
+
+            // =================================================
+            // UPDATE USER
+            // TERHUBUNG KE userapi.js
+            // =================================================
+
+            const result =
+                await updateUse(
+                    userToEdit.id,
+                    bodyData
                 );
-            }
+
+            // =================================================
+            // RESPONSE BACKEND
+            // =================================================
+
+            console.log(
+                "RESPONSE BACKEND:"
+            );
+
+            console.log(
+                result
+            );
+
+            // =================================================
+            // SUCCESS
+            // =================================================
 
             await Swal.fire({
                 icon: "success",
                 title: "Perubahan data berhasil disimpan",
                 text: "Data user berhasil diperbarui di database.",
-                confirmButtonColor: "#0B2B8E",
+                confirmButtonColor:
+                    "#0B2B8E",
             });
 
-            navigate("/user-management");
+            navigate(
+                "/user-management"
+            );
 
         } catch (error) {
+            // =================================================
+            // ERROR
+            // =================================================
+
             console.error(
-                "Error update user:",
+                "================================="
+            );
+
+            console.error(
+                "ERROR UPDATE USER:"
+            );
+
+            console.error(
                 error
             );
 
+            console.error(
+                "================================="
+            );
+
+            let errorMessage =
+                "Tidak dapat terhubung ke server.";
+
+            // =================================================
+            // ERROR RESPONSE DARI AXIOS
+            // =================================================
+
+            if (error.response) {
+                console.error(
+                    "STATUS:",
+                    error.response.status
+                );
+
+                console.error(
+                    "DATA:",
+                    error.response.data
+                );
+
+                errorMessage =
+                    error.response.data?.message ||
+                    error.response.data?.error ||
+                    error.message ||
+                    "Gagal memperbarui data user.";
+
+            } else if (
+                error.request
+            ) {
+                errorMessage =
+                    "Server tidak memberikan response. Periksa koneksi backend.";
+
+            } else {
+                errorMessage =
+                    error.message ||
+                    "Terjadi kesalahan.";
+            }
+
             setSubmitError(
-                error.message ||
-                "Tidak dapat terhubung ke server."
+                errorMessage
             );
 
             Swal.fire({
                 icon: "error",
                 title: "Gagal",
-                text:
-                    error.message ||
-                    "Tidak dapat terhubung ke server.",
-                confirmButtonColor: "#0B2B8E",
+                text: errorMessage,
+                confirmButtonColor:
+                    "#0B2B8E",
             });
 
         } finally {
             setSubmitting(false);
-
         }
     };
+
+    // =====================================================
+    // RETURN
+    // =====================================================
 
     return (
         <div
             className="d-flex align-items-start justify-content-center"
-            style={{ minHeight: "100vh", backgroundColor: "#F8F9FB", paddingTop: "48px", paddingBottom: "48px" }}
+            style={{
+                minHeight: "100vh",
+                backgroundColor: "#F8F9FB",
+                paddingTop: "48px",
+                paddingBottom: "48px",
+            }}
         >
-            <div style={{ width: "100%", maxWidth: "480px" }}>
+            <div
+                style={{
+                    width: "100%",
+                    maxWidth: "480px",
+                }}
+            >
+
+                {/* =========================================
+                    ERROR SERVER
+                ========================================= */}
+
                 {submitError && (
                     <div
                         className="d-flex align-items-start justify-content-between p-3 mb-3 rounded-3"
-                        style={{ background: "#fdeaea", border: "1px solid #f5c2c2" }}
+                        style={{
+                            background:
+                                "#fdeaea",
+                            border:
+                                "1px solid #f5c2c2",
+                        }}
                     >
-                        <div className="d-flex align-items-start" style={{ gap: "10px" }}>
-                            <i className="bi bi-exclamation-triangle-fill" style={{ color: "#c0392b", marginTop: "2px" }}></i>
-                            <span style={{ color: "#c0392b", fontSize: "12.5px" }}>{submitError}</span>
+                        <div
+                            className="d-flex align-items-start"
+                            style={{
+                                gap: "10px",
+                            }}
+                        >
+                            <i
+                                className="bi bi-exclamation-triangle-fill"
+                                style={{
+                                    color:
+                                        "#c0392b",
+                                    marginTop:
+                                        "2px",
+                                }}
+                            ></i>
+
+                            <span
+                                style={{
+                                    color:
+                                        "#c0392b",
+                                    fontSize:
+                                        "12.5px",
+                                }}
+                            >
+                                {submitError}
+                            </span>
                         </div>
+
                         <button
                             type="button"
                             className="btn btn-sm p-0"
-                            style={{ border: "none", background: "none", color: "#c0392b" }}
-                            onClick={() => setSubmitError("")}
+                            style={{
+                                border:
+                                    "none",
+                                background:
+                                    "none",
+                                color:
+                                    "#c0392b",
+                            }}
+                            onClick={() =>
+                                setSubmitError(
+                                    ""
+                                )
+                            }
                         >
                             <i className="bi bi-x-lg"></i>
                         </button>
                     </div>
                 )}
 
+                {/* =========================================
+                    CARD
+                ========================================= */}
+
                 <div
                     className="bg-white p-4"
-                    style={{ borderRadius: "20px", boxShadow: "0 8px 30px rgba(16,24,40,0.08)" }}>
-                    <h5 className="fw-bold text-center mb-4">Edit Data User</h5>
+                    style={{
+                        borderRadius:
+                            "20px",
+                        boxShadow:
+                            "0 8px 30px rgba(16,24,40,0.08)",
+                    }}
+                >
 
-                    <form onSubmit={handleSubmit} noValidate>
+                    <h5 className="fw-bold text-center mb-4">
+                        Edit Data User
+                    </h5>
+
+                    <form
+                        onSubmit={
+                            handleSubmit
+                        }
+                        noValidate
+                    >
+
+                        {/* =================================
+                            TITLE
+                        ================================= */}
+
                         <div className="mb-3">
-                            <label className="form-label fw-semibold small">Title</label>
+                            <label className="form-label fw-semibold small">
+                                Title
+                            </label>
+
                             <div className="d-flex gap-4">
-                                {TITLE_OPTIONS.map((opt) => (
-                                    <div className="form-check" key={opt.value}>
-                                        <input
-                                            className="form-check-input"
-                                            type="radio"
-                                            name="title"
-                                            id={`title-${opt.value}`}
-                                            value={opt.value}
-                                            checked={formData.title === opt.value}
-                                            onChange={handleChange}
-                                        />
-                                        <label className="form-check-label small" htmlFor={`title-${opt.value}`}>
-                                            {opt.label}
-                                        </label>
-                                    </div>
-                                ))}
+
+                                {TITLE_OPTIONS.map(
+                                    (opt) => (
+                                        <div
+                                            className="form-check"
+                                            key={
+                                                opt.value
+                                            }
+                                        >
+                                            <input
+                                                className="form-check-input"
+                                                type="radio"
+                                                name="title"
+                                                id={`title-${opt.value}`}
+                                                value={
+                                                    opt.value
+                                                }
+                                                checked={
+                                                    formData.title ===
+                                                    opt.value
+                                                }
+                                                onChange={
+                                                    handleChange
+                                                }
+                                            />
+
+                                            <label
+                                                className="form-check-label small"
+                                                htmlFor={`title-${opt.value}`}
+                                            >
+                                                {
+                                                    opt.label
+                                                }
+                                            </label>
+                                        </div>
+                                    )
+                                )}
+
                             </div>
                         </div>
 
+                        {/* =================================
+                            NAMA
+                        ================================= */}
+
                         <div className="mb-3">
-                            <label className="form-label fw-semibold small">Nama Lengkap</label>
+
+                            <label className="form-label fw-semibold small">
+                                Nama Lengkap
+                            </label>
+
                             <div className="position-relative">
+
                                 <input
                                     type="text"
                                     className="form-control"
-                                    style={{ borderRadius: "8px", paddingRight: "32px" }}
+                                    style={{
+                                        borderRadius:
+                                            "8px",
+                                        paddingRight:
+                                            "32px",
+                                    }}
                                     name="nama"
                                     placeholder="Masukkan Nama Lengkap"
-                                    value={formData.nama}
-                                    onChange={handleChange}
+                                    value={
+                                        formData.nama
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
                                 />
+
                                 {formData.nama && (
                                     <button
                                         type="button"
                                         className="btn btn-sm position-absolute top-50 end-0 translate-middle-y text-muted"
-                                        style={{ border: "none", background: "none" }}
-                                        onClick={() => clearField("nama")}
+                                        style={{
+                                            border:
+                                                "none",
+                                            background:
+                                                "none",
+                                        }}
+                                        onClick={() =>
+                                            clearField(
+                                                "nama"
+                                            )
+                                        }
                                     >
                                         <i className="bi bi-x-lg"></i>
                                     </button>
                                 )}
+
                             </div>
+
+                            {!formData.nama && (
+                                <div className="text-danger small mt-1">
+                                    Nama wajib diisi
+                                </div>
+                            )}
+
                         </div>
 
+                        {/* =================================
+                            NO HP
+                        ================================= */}
+
                         <div className="mb-3">
-                            <label className="form-label fw-semibold small">No. Handphone</label>
-                            <div className="d-flex" style={{ gap: "8px" }}>
+
+                            <label className="form-label fw-semibold small">
+                                No. Handphone
+                            </label>
+
+                            <div
+                                className="d-flex"
+                                style={{
+                                    gap: "8px",
+                                }}
+                            >
+
                                 <div
                                     className="d-flex align-items-center px-2"
                                     style={{
-                                        border: "1px solid #D0D5DD",
-                                        borderRadius: "8px",
-                                        backgroundColor: "#F9FAFB",
-                                        minWidth: "78px",
+                                        border:
+                                            "1px solid #D0D5DD",
+                                        borderRadius:
+                                            "8px",
+                                        backgroundColor:
+                                            "#F9FAFB",
+                                        minWidth:
+                                            "78px",
                                     }}
                                 >
+
                                     <span
                                         className="me-1"
                                         style={{
-                                            display: "inline-block",
-                                            width: "18px",
-                                            height: "13px",
-                                            background: "linear-gradient(to bottom, #CE1126 50%, #FFFFFF 50%)",
-                                            border: "1px solid #E4E7EC",
-                                            borderRadius: "2px",
-                                        }} >
+                                            display:
+                                                "inline-block",
+                                            width:
+                                                "18px",
+                                            height:
+                                                "13px",
+                                            background:
+                                                "linear-gradient(to bottom, #CE1126 50%, #FFFFFF 50%)",
+                                            border:
+                                                "1px solid #E4E7EC",
+                                            borderRadius:
+                                                "2px",
+                                        }}
+                                    />
 
+                                    <span className="small text-muted">
+                                        +62
                                     </span>
-                                    <span className="small text-muted">+62</span>
+
                                 </div>
+
                                 <div className="position-relative flex-grow-1">
+
                                     <input
                                         type="text"
                                         inputMode="numeric"
-                                        className={`form-control ${errors.noHandphone ? "is-invalid" : ""}`}
-                                        style={{ borderRadius: "8px", paddingRight: "32px" }}
+                                        className={`form-control ${
+                                            errors.noHandphone
+                                                ? "is-invalid"
+                                                : ""
+                                        }`}
+                                        style={{
+                                            borderRadius:
+                                                "8px",
+                                            paddingRight:
+                                                "32px",
+                                        }}
                                         name="noHandphone"
                                         placeholder="Cth : 812-xxx-xxx"
-                                        value={formData.noHandphone}
-                                        onChange={handleChange}
+                                        value={
+                                            formData.noHandphone
+                                        }
+                                        onChange={
+                                            handleChange
+                                        }
                                     />
+
                                     {formData.noHandphone && (
                                         <button
                                             type="button"
                                             className="btn btn-sm position-absolute top-50 end-0 translate-middle-y text-muted"
-                                            style={{ border: "none", background: "none" }}
-                                            onClick={() => clearField("noHandphone")}
+                                            style={{
+                                                border:
+                                                    "none",
+                                                background:
+                                                    "none",
+                                            }}
+                                            onClick={() =>
+                                                clearField(
+                                                    "noHandphone"
+                                                )
+                                            }
                                         >
                                             <i className="bi bi-x-lg"></i>
                                         </button>
                                     )}
+
                                 </div>
+
                             </div>
-                            {errors.noHandphone && <div className="text-danger small mt-1">{errors.noHandphone}</div>}
+
+                            {errors.noHandphone && (
+                                <div className="text-danger small mt-1">
+                                    {
+                                        errors.noHandphone
+                                    }
+                                </div>
+                            )}
+
                         </div>
 
+                        {/* =================================
+                            EMAIL
+                        ================================= */}
+
                         <div className="mb-3">
-                            <label className="form-label fw-semibold small">Email</label>
+
+                            <label className="form-label fw-semibold small">
+                                Email
+                            </label>
+
                             <div className="position-relative">
+
                                 <input
                                     type="email"
-                                    className={`form-control ${errors.email ? "is-invalid" : ""}`}
-                                    style={{ borderRadius: "8px", paddingRight: "32px" }}
+                                    className={`form-control ${
+                                        errors.email
+                                            ? "is-invalid"
+                                            : ""
+                                    }`}
+                                    style={{
+                                        borderRadius:
+                                            "8px",
+                                        paddingRight:
+                                            "32px",
+                                    }}
                                     name="email"
                                     placeholder="Misal : hicolleagues@gmail.com"
-                                    value={formData.email}
-                                    onChange={handleChange}
+                                    value={
+                                        formData.email
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
                                 />
+
                                 {formData.email && (
                                     <button
                                         type="button"
                                         className="btn btn-sm position-absolute top-50 end-0 translate-middle-y text-muted"
-                                        style={{ border: "none", background: "none" }}
-                                        onClick={() => clearField("email")}
+                                        style={{
+                                            border:
+                                                "none",
+                                            background:
+                                                "none",
+                                        }}
+                                        onClick={() =>
+                                            clearField(
+                                                "email"
+                                            )
+                                        }
                                     >
                                         <i className="bi bi-x-lg"></i>
                                     </button>
                                 )}
+
                             </div>
-                            {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
+
+                            {errors.email && (
+                                <div className="text-danger small mt-1">
+                                    {
+                                        errors.email
+                                    }
+                                </div>
+                            )}
+
                         </div>
 
+                        {/* =================================
+                            TANGGAL LAHIR
+                        ================================= */}
+
                         <div className="mb-3">
-                            <label className="form-label fw-semibold small">Tanggal Lahir</label>
+
+                            <label className="form-label fw-semibold small">
+                                Tanggal Lahir
+                            </label>
+
                             <input
                                 type="date"
                                 className="form-control"
-                                style={{ borderRadius: "8px" }}
+                                style={{
+                                    borderRadius:
+                                        "8px",
+                                }}
                                 name="tanggalLahir"
-                                value={formData.tanggalLahir}
-                                onChange={handleChange}
+                                value={
+                                    formData.tanggalLahir
+                                }
+                                onChange={
+                                    handleChange
+                                }
                             />
+
+                            {!formData.tanggalLahir && (
+                                <div className="text-danger small mt-1">
+                                    Tanggal lahir wajib diisi
+                                </div>
+                            )}
+
                         </div>
 
+                        {/* =================================
+                            ROLE
+                        ================================= */}
+
                         <div className="mb-3">
-                            <label className="form-label fw-semibold small">Roles</label>
+
+                            <label className="form-label fw-semibold small">
+                                Roles
+                            </label>
+
                             <select
                                 className="form-select"
-                                style={{ borderRadius: "8px" }}
+                                style={{
+                                    borderRadius:
+                                        "8px",
+                                }}
                                 name="role"
-                                value={formData.role}
-                                onChange={handleChange}
+                                value={
+                                    formData.role
+                                }
+                                onChange={
+                                    handleChange
+                                }
                             >
-                                <option value="" disabled>
+
+                                <option
+                                    value=""
+                                    disabled
+                                >
                                     Pilih Role
                                 </option>
-                                <option value="Admin">Admin</option>
-                                <option value="Member">Member</option>
+
+                                <option value="Admin">
+                                    Admin
+                                </option>
+
+                                <option value="Member">
+                                    Member
+                                </option>
+
                             </select>
+
+                            {!formData.role && (
+                                <div className="text-danger small mt-1">
+                                    Role wajib dipilih
+                                </div>
+                            )}
+
                         </div>
 
                         <hr className="my-4" />
 
+                        {/* =================================
+                            UBAH PASSWORD
+                        ================================= */}
+
                         <div className="mb-3 form-check">
+
                             <input
                                 type="checkbox"
                                 className="form-check-input"
                                 id="ubahSandi"
-                                checked={ubahSandi}
-                                onChange={(e) => setUbahSandi(e.target.checked)}
+                                checked={
+                                    ubahSandi
+                                }
+                                onChange={(e) =>
+                                    setUbahSandi(
+                                        e.target.checked
+                                    )
+                                }
                             />
-                            <label className="form-check-label small fw-semibold" htmlFor="ubahSandi">
+
+                            <label
+                                className="form-check-label small fw-semibold"
+                                htmlFor="ubahSandi"
+                            >
                                 Ubah Kata Sandi
                             </label>
+
                         </div>
+
+                        {/* =================================
+                            PASSWORD BARU
+                        ================================= */}
 
                         {ubahSandi && (
                             <>
                                 <div className="mb-3">
-                                    <label className="form-label fw-semibold small">Kata Sandi Baru</label>
+
+                                    <label className="form-label fw-semibold small">
+                                        Kata Sandi Baru
+                                    </label>
+
                                     <div className="position-relative">
+
                                         <input
-                                            type={showPassword ? "text" : "password"}
-                                            className={`form-control ${errors.password ? "is-invalid" : ""}`}
+                                            type={
+                                                showPassword
+                                                    ? "text"
+                                                    : "password"
+                                            }
+                                            className={`form-control ${
+                                                errors.password
+                                                    ? "is-invalid"
+                                                    : ""
+                                            }`}
                                             id="editPasswordBaru"
                                             style={{
-                                                borderRadius: "8px",
-                                                paddingRight: "32px",
-                                                WebkitAppearance: "none",
-                                                MozAppearance: "textfield",
+                                                borderRadius:
+                                                    "8px",
+                                                paddingRight:
+                                                    "40px",
+                                                WebkitAppearance:
+                                                    "none",
+                                                MozAppearance:
+                                                    "textfield",
                                             }}
                                             placeholder="Masukkan Kata Sandi Baru"
-                                            value={password}
-                                            onChange={handlePasswordChange}
+                                            value={
+                                                password
+                                            }
+                                            onChange={
+                                                handlePasswordChange
+                                            }
                                         />
+
                                         <button
                                             type="button"
                                             className="btn btn-sm position-absolute top-50 end-0 translate-middle-y text-muted"
-                                            style={{ border: "none", background: "none" }}
-                                            onClick={() => setShowPassword((prev) => !prev)}
+                                            style={{
+                                                border:
+                                                    "none",
+                                                background:
+                                                    "none",
+                                            }}
+                                            onClick={() =>
+                                                setShowPassword(
+                                                    (prev) =>
+                                                        !prev
+                                                )
+                                            }
                                         >
-                                            <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                                            <i
+                                                className={`bi ${
+                                                    showPassword
+                                                        ? "bi-eye-slash"
+                                                        : "bi-eye"
+                                                }`}
+                                            ></i>
                                         </button>
+
                                     </div>
-                                    {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
+
+                                    {errors.password && (
+                                        <div className="text-danger small mt-1">
+                                            {
+                                                errors.password
+                                            }
+                                        </div>
+                                    )}
+
                                 </div>
 
+                                {/* =================================
+                                    CONFIRM PASSWORD
+                                ================================= */}
+
                                 <div className="mb-4">
-                                    <label className="form-label fw-semibold small">Konfirmasi Kata Sandi Baru</label>
+
+                                    <label className="form-label fw-semibold small">
+                                        Konfirmasi Kata Sandi Baru
+                                    </label>
+
                                     <div className="position-relative">
+
                                         <input
-                                            type={showConfirmPassword ? "text" : "password"}
-                                            className={`form-control ${errors.confirmPassword ? "is-invalid" : ""}`}
+                                            type={
+                                                showConfirmPassword
+                                                    ? "text"
+                                                    : "password"
+                                            }
+                                            className={`form-control ${
+                                                errors.confirmPassword
+                                                    ? "is-invalid"
+                                                    : ""
+                                            }`}
                                             id="editPasswordKonfirmasi"
                                             style={{
-                                                borderRadius: "8px",
-                                                paddingRight: "32px",
-                                                WebkitAppearance: "none",
-                                                MozAppearance: "textfield",
+                                                borderRadius:
+                                                    "8px",
+                                                paddingRight:
+                                                    "40px",
+                                                WebkitAppearance:
+                                                    "none",
+                                                MozAppearance:
+                                                    "textfield",
                                             }}
                                             placeholder="Masukkan Ulang Kata Sandi Baru"
-                                            value={confirmPassword}
-                                            onChange={handleConfirmPasswordChange}
+                                            value={
+                                                confirmPassword
+                                            }
+                                            onChange={
+                                                handleConfirmPasswordChange
+                                            }
                                         />
+
                                         <button
                                             type="button"
                                             className="btn btn-sm position-absolute top-50 end-0 translate-middle-y text-muted"
-                                            style={{ border: "none", background: "none" }}
-                                            onClick={() => setShowConfirmPassword((prev) => !prev)}
+                                            style={{
+                                                border:
+                                                    "none",
+                                                background:
+                                                    "none",
+                                            }}
+                                            onClick={() =>
+                                                setShowConfirmPassword(
+                                                    (prev) =>
+                                                        !prev
+                                                )
+                                            }
                                         >
-                                            <i className={`bi ${showConfirmPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                                            <i
+                                                className={`bi ${
+                                                    showConfirmPassword
+                                                        ? "bi-eye-slash"
+                                                        : "bi-eye"
+                                                }`}
+                                            ></i>
                                         </button>
+
                                     </div>
-                                    {errors.confirmPassword && <div className="text-danger small mt-1">{errors.confirmPassword}</div>}
+
+                                    {errors.confirmPassword && (
+                                        <div className="text-danger small mt-1">
+                                            {
+                                                errors.confirmPassword
+                                            }
+                                        </div>
+                                    )}
+
                                 </div>
 
                                 <style>{`
@@ -589,61 +1480,155 @@ export default function EditDataUser() {
                             </>
                         )}
 
+                        {/* =================================
+                            ALASAN NON AKTIF
+                        ================================= */}
+
                         {isNonActive && (
                             <div className="mb-4">
-                                <label className="form-label fw-semibold small">Alasan Non Aktif</label>
+
+                                <label className="form-label fw-semibold small">
+                                    Alasan Non Aktif
+                                </label>
+
                                 <textarea
-                                    className={`form-control ${errors.alasanNonAktif ? "is-invalid" : ""}`}
-                                    style={{ borderRadius: "8px" }}
+                                    className={`form-control ${
+                                        errors.alasanNonAktif
+                                            ? "is-invalid"
+                                            : ""
+                                    }`}
+                                    style={{
+                                        borderRadius:
+                                            "8px",
+                                    }}
                                     rows={3}
                                     placeholder="Masukkan alasan non aktif"
                                     name="alasanNonAktif"
-                                    value={formData.alasanNonAktif}
-                                    onChange={handleChange}
+                                    value={
+                                        formData.alasanNonAktif
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
                                 />
-                                {errors.alasanNonAktif && <div className="text-danger small mt-1">{errors.alasanNonAktif}</div>}
+
+                                {errors.alasanNonAktif && (
+                                    <div className="text-danger small mt-1">
+                                        {
+                                            errors.alasanNonAktif
+                                        }
+                                    </div>
+                                )}
+
                             </div>
                         )}
+
+                        {/* =================================
+                            SIMPAN
+                        ================================= */}
 
                         <button
                             type="submit"
                             className="btn w-100 fw-semibold text-white text-uppercase"
-                            disabled={submitting}
+                            disabled={
+                                submitting ||
+                                !isFormValid()
+                            }
                             style={{
-                                backgroundColor: (isFormValid() && !submitting) ? "#0B2B8E" : "#A0A3BD",
-                                borderRadius: "999px",
-                                padding: "12px 0",
-                                letterSpacing: "0.5px",
-                                border: "none",
-                                transition: "background-color 0.2s ease",
+                                backgroundColor:
+                                    isFormValid() &&
+                                    !submitting
+                                        ? "#0B2B8E"
+                                        : "#A0A3BD",
+
+                                borderRadius:
+                                    "999px",
+
+                                padding:
+                                    "12px 0",
+
+                                letterSpacing:
+                                    "0.5px",
+
+                                border:
+                                    "none",
+
+                                transition:
+                                    "background-color 0.2s ease",
                             }}
                         >
-                            {submitting ? "Menyimpan..." : "Simpan Perubahan"}
+                            {submitting
+                                ? "Menyimpan..."
+                                : "Simpan Perubahan"}
                         </button>
+
+                        {/* =================================
+                            KEMBALI
+                        ================================= */}
+
                         <button
                             type="button"
-                            onClick={() => navigate("/user-management")}
+                            disabled={
+                                submitting
+                            }
+                            onClick={() =>
+                                navigate(
+                                    "/user-management"
+                                )
+                            }
                             className="btn w-100 fw-semibold text-white text-uppercase mt-2"
                             style={{
-                                backgroundColor: isFormValid() ? "#77797c" : "#8d8e94",
-                                borderRadius: "999px",
-                                padding: "12px 0",
-                                letterSpacing: "0.5px",
-                                border: "none",
-                                transition: "background-color 0.2s ease",
+                                backgroundColor:
+                                    "#77797c",
+
+                                borderRadius:
+                                    "999px",
+
+                                padding:
+                                    "12px 0",
+
+                                letterSpacing:
+                                    "0.5px",
+
+                                border:
+                                    "none",
                             }}
                         >
                             Kembali
                         </button>
+
                     </form>
                 </div>
 
+                {/* =========================================
+                    CATATAN NON ACTIVE
+                ========================================= */}
+
                 {isNonActive && (
                     <div className="text-muted small mt-3 px-2">
-                        <strong>CATATAN:</strong> Form Edit Data User untuk user berstatus <strong>Non Active</strong> menampilkan field tambahan{" "}
-                        <strong>"Alasan Non Aktif"</strong> yang wajib diisi.
+
+                        <strong>
+                            CATATAN:
+                        </strong>{" "}
+
+                        Form Edit Data User untuk user
+                        berstatus{" "}
+
+                        <strong>
+                            Non Active
+                        </strong>{" "}
+
+                        menampilkan field tambahan{" "}
+
+                        <strong>
+                            "Alasan Non Aktif"
+                        </strong>{" "}
+
+                        yang wajib diisi.
+
                     </div>
                 )}
+
             </div>
         </div>
     );

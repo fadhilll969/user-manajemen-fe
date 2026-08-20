@@ -3,6 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Modal } from "react-bootstrap";
 import Swal from "sweetalert2";
 
+import {
+  getUsers,
+  updateUser,
+  deleteUser,
+} from "../api/userapi";
 
 // =========================
 // MONTH
@@ -165,6 +170,7 @@ function MiniCalendar({
   return (
     <div style={{ width: "230px" }}>
       {/* HEADER */}
+
       <div className="d-flex justify-content-between align-items-center mb-2">
         <button
           type="button"
@@ -196,6 +202,7 @@ function MiniCalendar({
       </div>
 
       {/* CALENDAR */}
+
       <div
         className="d-grid"
         style={{
@@ -205,6 +212,7 @@ function MiniCalendar({
         }}
       >
         {/* DAY */}
+
         {DAY_LABELS.map((d) => (
           <div
             key={d}
@@ -218,6 +226,7 @@ function MiniCalendar({
         ))}
 
         {/* DATE */}
+
         {cells.map((cell, idx) => {
           const isStart = sameDay(
             cell.date,
@@ -301,27 +310,44 @@ export default function UserManagement() {
   const [showDetail, setShowDetail] =
     useState(false);
 
-  // Delete / Non Active
+  // =========================
+  // DELETE / NON ACTIVE
+  // =========================
+
   const [userToDelete, setUserToDelete] =
     useState(null);
 
-  const [showDeleteConfirm, setShowDeleteConfirm] =
-    useState(false);
+  const [
+    showDeleteConfirm,
+    setShowDeleteConfirm,
+  ] = useState(false);
 
   const [deleteReason, setDeleteReason] =
     useState("");
 
-  const [deleteReasonError, setDeleteReasonError] =
-    useState("");
+  const [
+    deleteReasonError,
+    setDeleteReasonError,
+  ] = useState("");
 
-  // Reactivate
-  const [userToReactivate, setUserToReactivate] =
-    useState(null);
+  // =========================
+  // REACTIVATE
+  // =========================
 
-  const [showReactivateConfirm, setShowReactivateConfirm] =
-    useState(false);
+  const [
+    userToReactivate,
+    setUserToReactivate,
+  ] = useState(null);
 
-  // Permanent Delete
+  const [
+    showReactivateConfirm,
+    setShowReactivateConfirm,
+  ] = useState(false);
+
+  // =========================
+  // PERMANENT DELETE
+  // =========================
+
   const [
     userToPermanentDelete,
     setUserToPermanentDelete,
@@ -332,11 +358,16 @@ export default function UserManagement() {
     setShowPermanentDeleteConfirm,
   ] = useState(false);
 
-  // Calendar
+  // =========================
+  // CALENDAR
+  // =========================
+
   const today = new Date();
 
-  const [showDatePicker, setShowDatePicker] =
-    useState(false);
+  const [
+    showDatePicker,
+    setShowDatePicker,
+  ] = useState(false);
 
   const [leftMonth, setLeftMonth] =
     useState(
@@ -367,9 +398,10 @@ export default function UserManagement() {
       "4 April 2023 - 16 Juli 2023"
     );
 
-  // =========================
+  // =====================================================
   // GET USERS
-  // =========================
+  // GET /users
+  // =====================================================
 
   const fetchUsers = async () => {
     try {
@@ -378,15 +410,34 @@ export default function UserManagement() {
       const result = await getUsers();
 
       console.log(
-        "Data users:",
+        "Data users dari backend:",
         result
       );
 
-      setUsers(
-        Array.isArray(result.data)
-          ? result.data
-          : []
-      );
+      /*
+       * Backend bisa mengembalikan:
+       *
+       * [
+       *   {...},
+       *   {...}
+       * ]
+       *
+       * atau:
+       *
+       * {
+       *   data: [...]
+       * }
+       *
+       * Kita handle dua-duanya.
+       */
+
+      const userData = Array.isArray(result)
+        ? result
+        : Array.isArray(result?.data)
+        ? result.data
+        : [];
+
+      setUsers(userData);
     } catch (error) {
       console.error(
         "Error fetch users:",
@@ -413,9 +464,10 @@ export default function UserManagement() {
     fetchUsers();
   }, []);
 
-  // =========================
+  // =====================================================
   // NON ACTIVE
-  // =========================
+  // PUT /users/{id}
+  // =====================================================
 
   const handleDeleteClick = (user) => {
     setUserToDelete(user);
@@ -489,9 +541,10 @@ export default function UserManagement() {
     }
   };
 
-  // =========================
+  // =====================================================
   // REACTIVATE
-  // =========================
+  // PUT /users/{id}
+  // =====================================================
 
   const handleReactivateClick = (user) => {
     setUserToReactivate(user);
@@ -549,9 +602,10 @@ export default function UserManagement() {
       }
     };
 
-  // =========================
+  // =====================================================
   // PERMANENT DELETE
-  // =========================
+  // DELETE /users/{id}
+  // =====================================================
 
   const handlePermanentDeleteClick =
     (user) => {
@@ -611,9 +665,9 @@ export default function UserManagement() {
       }
     };
 
-  // =========================
+  // =====================================================
   // DETAIL
-  // =========================
+  // =====================================================
 
   const handleViewDetail = (user) => {
     setSelectedUser(user);
@@ -621,9 +675,9 @@ export default function UserManagement() {
     setShowDetail(true);
   };
 
-  // =========================
+  // =====================================================
   // CALENDAR
-  // =========================
+  // =====================================================
 
   const handleDayClick = (date) => {
     if (
@@ -658,12 +712,12 @@ export default function UserManagement() {
     setShowDatePicker(false);
   };
 
-  // =========================
+  // =====================================================
   // FILTER
-  // =========================
+  // =====================================================
 
-  const filteredUsers =
-    users.filter((user) => {
+  const filteredUsers = users.filter(
+    (user) => {
       const matchesSearch =
         user.nama
           ?.toLowerCase()
@@ -682,11 +736,12 @@ export default function UserManagement() {
         matchesSearch &&
         matchesTab
       );
-    });
+    }
+  );
 
-  // =========================
+  // =====================================================
   // TITLE COLOR
-  // =========================
+  // =====================================================
 
   const titleColor = {
     Tn: {
@@ -705,21 +760,22 @@ export default function UserManagement() {
     },
   };
 
-  // =========================
+  // =====================================================
   // RETURN
-  // =========================
+  // =====================================================
 
   return (
     <div className="p-3 min-vh-100">
       <div className="border-0 shadow-sm rounded-4 p-3 bg-light">
 
-        {/* =========================
+        {/* =====================================================
             SUMMARY CARD
-        ========================= */}
+        ===================================================== */}
 
         <div className="row mb-4 g-3">
 
           {/* TOTAL MEMBER */}
+
           <div className="col-md-4">
             <div
               className="card border-0 p-4"
@@ -765,6 +821,7 @@ export default function UserManagement() {
           </div>
 
           {/* MEMBER BARU */}
+
           <div className="col-md-5">
             <div
               className="card border-0 p-4"
@@ -816,9 +873,9 @@ export default function UserManagement() {
           </div>
         </div>
 
-        {/* =========================
+        {/* =====================================================
             TABLE CONTAINER
-        ========================= */}
+        ===================================================== */}
 
         <div
           className="bg-white p-4"
@@ -829,9 +886,9 @@ export default function UserManagement() {
           }}
         >
 
-          {/* =========================
+          {/* =====================================================
               TAB
-          ========================= */}
+          ===================================================== */}
 
           <div className="border-bottom mb-3">
 
@@ -872,13 +929,14 @@ export default function UserManagement() {
 
           </div>
 
-          {/* =========================
+          {/* =====================================================
               SEARCH / FILTER
-          ========================= */}
+          ===================================================== */}
 
           <div className="row g-2 align-items-center mb-3 position-relative">
 
             {/* SEARCH */}
+
             <div className="col-md-4">
               <div className="input-group">
 
@@ -912,6 +970,7 @@ export default function UserManagement() {
             </div>
 
             {/* DATE */}
+
             <div className="col-md-5">
               <div
                 className="input-group"
@@ -950,6 +1009,7 @@ export default function UserManagement() {
               </div>
 
               {/* DATE PICKER */}
+
               {showDatePicker && (
                 <div
                   className="bg-white shadow-sm border rounded-4 p-3 position-absolute"
@@ -1107,8 +1167,8 @@ export default function UserManagement() {
             </div>
 
             {/* BUTTON CREATE */}
-            <div className="col-md-3 text-end">
 
+            <div className="col-md-3 text-end">
               <button
                 className="btn btn-primary w-100 fw-semibold d-flex align-items-center justify-content-center gap-2"
                 style={{
@@ -1128,14 +1188,13 @@ export default function UserManagement() {
                 <i className="bi bi-plus-lg"></i>
                 Buat User Baru
               </button>
-
             </div>
 
           </div>
 
-          {/* =========================
+          {/* =====================================================
               TABLE
-          ========================= */}
+          ===================================================== */}
 
           <div className="table-responsive">
 
@@ -1207,6 +1266,7 @@ export default function UserManagement() {
               <tbody>
 
                 {/* LOADING */}
+
                 {loading ? (
                   <tr>
                     <td
@@ -1222,16 +1282,17 @@ export default function UserManagement() {
                       user...
                     </td>
                   </tr>
-
                 ) : filteredUsers.length ===
                   0 ? (
 
                   /* EMPTY */
+
                   <tr>
                     <td
                       colSpan="8"
                       className="text-center py-5 text-muted"
                     >
+
                       {activeTab ===
                       "active" ? (
                         <>
@@ -1253,14 +1314,17 @@ export default function UserManagement() {
                           aktif.
                         </>
                       )}
+
                     </td>
                   </tr>
 
                 ) : (
 
                   /* DATA */
+
                   filteredUsers.map(
                     (user, index) => {
+
                       const tc =
                         titleColor[
                           user.title
@@ -1280,11 +1344,13 @@ export default function UserManagement() {
                         >
 
                           {/* NO */}
+
                           <td className="ps-3">
                             {index + 1}
                           </td>
 
                           {/* TITLE */}
+
                           <td>
                             <span
                               className="fw-semibold px-2 py-1"
@@ -1299,33 +1365,41 @@ export default function UserManagement() {
                                   "0.8rem",
                               }}
                             >
-                              {user.title}
+                              {user.title ||
+                                "-"}
                             </span>
                           </td>
 
                           {/* NAMA */}
+
                           <td className="fw-medium text-dark">
-                            {user.nama}
+                            {user.nama ||
+                              "-"}
                           </td>
 
                           {/* PHONE */}
+
                           <td>
-                            {user.noHandphone}
+                            {user.noHandphone ||
+                              "-"}
                           </td>
 
                           {/* EMAIL */}
+
                           <td>
-                            {user.email}
+                            {user.email ||
+                              "-"}
                           </td>
 
                           {/* DOB */}
+
                           <td>
-                            {
-                              user.tanggalLahir
-                            }
+                            {user.tanggalLahir ||
+                              "-"}
                           </td>
 
                           {/* ROLE */}
+
                           <td>
                             <span
                               className="fw-semibold px-2 py-1"
@@ -1346,14 +1420,17 @@ export default function UserManagement() {
                                   "0.8rem",
                               }}
                             >
-                              {user.role}
+                              {user.role ||
+                                "-"}
                             </span>
                           </td>
 
                           {/* ACTION */}
+
                           <td className="text-center">
 
                             {/* DETAIL */}
+
                             <button
                               className="btn btn-link text-secondary p-1 me-1"
                               title="Lihat Detail"
@@ -1367,6 +1444,7 @@ export default function UserManagement() {
                             </button>
 
                             {/* EDIT */}
+
                             <button
                               className="btn btn-link text-secondary p-1 me-1"
                               title="Edit"
@@ -1385,10 +1463,12 @@ export default function UserManagement() {
                             </button>
 
                             {/* NON ACTIVE */}
+
                             {user.status ===
                             "non-active" ? (
                               <>
                                 {/* REACTIVATE */}
+
                                 <button
                                   className="btn btn-link p-1 me-1"
                                   style={{
@@ -1406,6 +1486,7 @@ export default function UserManagement() {
                                 </button>
 
                                 {/* PERMANENT DELETE */}
+
                                 <button
                                   className="btn btn-link text-danger p-1"
                                   title="Hapus Permanen"
@@ -1418,10 +1499,10 @@ export default function UserManagement() {
                                   <i className="bi bi-trash"></i>
                                 </button>
                               </>
-
                             ) : (
 
                               /* SOFT DELETE */
+
                               <button
                                 className="btn btn-link text-danger p-1"
                                 title="Nonaktifkan"
@@ -1433,7 +1514,6 @@ export default function UserManagement() {
                               >
                                 <i className="bi bi-trash"></i>
                               </button>
-
                             )}
 
                           </td>

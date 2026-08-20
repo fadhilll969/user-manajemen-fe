@@ -294,8 +294,11 @@ export default function TambahDataUser() {
       formData.role.trim() !== "" &&
       formData.password.trim() !== "" &&
       formData.confirmPassword.trim() !== "" &&
+      !errors.nama &&
       !errors.noHandphone &&
       !errors.email &&
+      !errors.tanggalLahir &&
+      !errors.role &&
       !errors.password &&
       !errors.confirmPassword &&
       formData.password === formData.confirmPassword
@@ -419,11 +422,12 @@ export default function TambahDataUser() {
     try {
       setLoading(true);
 
-      // INI YANG TERHUBUNG KE userapi.js
       const result = await tambahDataUser(dataUser);
 
+      console.log("=================================");
       console.log("RESPONSE BACKEND:");
       console.log(result);
+      console.log("=================================");
 
       // =================================================
       // SUCCESS
@@ -437,7 +441,6 @@ export default function TambahDataUser() {
       });
 
       navigate("/user-management");
-
     } catch (error) {
       console.error("=================================");
       console.error("ERROR TAMBAH DATA USER:");
@@ -463,11 +466,9 @@ export default function TambahDataUser() {
           error.response.data?.error ||
           error.message ||
           "Gagal menambahkan user.";
-
       } else if (error.request) {
         errorMessage =
           "Server tidak memberikan response. Periksa koneksi backend.";
-
       } else {
         errorMessage =
           error.message ||
@@ -480,7 +481,6 @@ export default function TambahDataUser() {
         text: errorMessage,
         confirmButtonColor: "#0B2B8E",
       });
-
     } finally {
       setLoading(false);
     }
@@ -657,7 +657,7 @@ export default function TambahDataUser() {
                     paddingRight: "40px",
                   }}
                   name="noHandphone"
-                  placeholder="Masukan Nomer"
+                  placeholder="Masukkan Nomor"
                   value={
                     formData.noHandphone
                   }
@@ -702,14 +702,16 @@ export default function TambahDataUser() {
               <input
                 type="email"
                 className={`form-control ${
-                  errors.email ? "is-invalid" : ""
+                  errors.email
+                    ? "is-invalid"
+                    : ""
                 }`}
                 style={{
                   borderRadius: "8px",
                   paddingRight: "40px",
                 }}
                 name="email"
-                placeholder="Masukan Email"
+                placeholder="Masukkan Email"
                 value={formData.email}
                 onChange={handleChange}
               />
