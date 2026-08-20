@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 // Sesuaikan path dengan lokasi file userApi.js kamu
-import { createUser } from "../api/userApi";
+import { tambahDataUser } from "../api/userApi";
 
 const TITLE_OPTIONS = [
   { value: "Tn", label: "Tuan" },
