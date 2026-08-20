@@ -681,7 +681,7 @@ export default function EditDataUser() {
             // =================================================
 
             const result =
-                await updateUse(
+                await updateUser(
                     userToEdit.id,
                     bodyData
                 );
