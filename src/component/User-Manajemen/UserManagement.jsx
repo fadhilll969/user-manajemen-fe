@@ -3,8 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Modal } from "react-bootstrap";
 import Swal from "sweetalert2";
 
-import { createUser } from "../api/userApi";
-
+import {
+  getUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+} from "../api/userApi";
 
 // =========================
 // MONTH
