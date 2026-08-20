@@ -43,14 +43,17 @@ export const createUser = async (data) => {
   return response.data;
 };
 
-// =========================
-// GET USERS
-// =========================
-
-export const getUsers = async () => {
-  const response = await axios.get(
-    `${API_URL}/users`
+export const createUser = async (data) => {
+  const response = await axios.post(
+    `${API_URL}/users`,
+    data,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
   );
 
   return response.data;
 };
+
