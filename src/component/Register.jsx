@@ -8,6 +8,7 @@ const EMAIL_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@gmail\.com$/;
 export default function Register() {
     const navigate = useNavigate();
 
+    // Field SESUAI dengan Backend
     const [nama, setNama] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -61,7 +62,7 @@ export default function Register() {
     };
 
     // =========================
-    // INPUT
+    // HANDLE INPUT
     // =========================
 
     const handleNamaChange = (e) => {
@@ -136,11 +137,16 @@ export default function Register() {
         setSubmitting(true);
 
         try {
-            const data = await createUser({
+            // DATA YANG DIKIRIM KE BACKEND
+            const payload = {
                 nama: nama.trim(),
                 email: email.trim(),
                 password: password,
-            });
+            };
+
+            console.log("Data register:", payload);
+
+            const data = await createUser(payload);
 
             console.log("Register berhasil:", data);
 
@@ -153,6 +159,7 @@ export default function Register() {
                 showConfirmButton: false,
             });
 
+            // Kembali ke LOGIN
             navigate("/");
         } catch (error) {
             console.error("Register error:", error);
@@ -174,7 +181,7 @@ export default function Register() {
     };
 
     // =========================
-    // CLEAR
+    // CLEAR INPUT
     // =========================
 
     const clearNama = () => {
@@ -221,6 +228,14 @@ export default function Register() {
                         boxShadow: "0 8px 30px rgba(16,24,40,0.08)",
                     }}
                 >
+                    <h5 className="fw-bold text-center mb-1">
+                        Buat Akun Baru
+                    </h5>
+
+                    <p className="text-muted text-center small mb-4">
+                        Daftarkan akun untuk mulai menggunakan sistem
+                    </p>
+
                     <form onSubmit={handleSubmit} noValidate>
 
                         {/* NAMA */}
@@ -322,7 +337,9 @@ export default function Register() {
                         {/* PASSWORD */}
                         <div className="form-floating position-relative mb-1 mt-3">
                             <input
-                                type={showPassword ? "text" : "password"}
+                                type={
+                                    showPassword ? "text" : "password"
+                                }
                                 className={`form-control ${
                                     errors.password ? "is-invalid" : ""
                                 }`}
@@ -391,7 +408,9 @@ export default function Register() {
                         <button
                             type="submit"
                             className="btn w-100 fw-semibold text-white text-uppercase"
-                            disabled={submitting || !isFormValid()}
+                            disabled={
+                                submitting || !isFormValid()
+                            }
                             style={{
                                 backgroundColor:
                                     isFormValid() && !submitting
@@ -401,9 +420,13 @@ export default function Register() {
                                 padding: "12px 0",
                                 letterSpacing: "0.5px",
                                 border: "none",
+                                transition:
+                                    "background-color 0.2s ease",
                             }}
                         >
-                            {submitting ? "Memproses..." : "Daftar"}
+                            {submitting
+                                ? "Memproses..."
+                                : "Daftar"}
                         </button>
 
                         {/* TERMS */}
@@ -438,6 +461,7 @@ export default function Register() {
                         </p>
                     </form>
 
+                    {/* COPYRIGHT */}
                     <p
                         className="text-center text-muted mt-4 mb-0"
                         style={{
