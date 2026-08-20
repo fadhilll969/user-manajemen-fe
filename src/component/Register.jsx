@@ -98,7 +98,7 @@ export default function Register() {
         setSubmitting(true);
 
         try {
-            const response = await fetch("http://localhost:8000/register", {
+            const response = await fetch("https://backend-kamu.up.railway.app", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

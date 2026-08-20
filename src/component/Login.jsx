@@ -54,7 +54,7 @@ export default function Login() {
         }
         setSubmitting(true);
         try {
-            const response = await fetch("http://localhost:8000/login",
+            const response = await fetch("https://backend-kamu.up.railway.app",
                 {
                     method: "POST", headers: { "Content-Type": "application/json", },
                     body: JSON.stringify({
