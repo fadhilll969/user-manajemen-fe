@@ -3,7 +3,9 @@ import axios from "axios";
 const API_URL =
   "https://user-manajemen-be-production.up.railway.app";
 
+// =========================
 // LOGIN
+// =========================
 export const loginUser = async (data) => {
   const response = await axios.post(
     `${API_URL}/login`,
@@ -18,7 +20,9 @@ export const loginUser = async (data) => {
   return response.data;
 };
 
+// =========================
 // BUAT USER BARU
+// =========================
 export const createUser = async (data) => {
   const response = await axios.post(
     `${API_URL}/register`,
@@ -33,7 +37,9 @@ export const createUser = async (data) => {
   return response.data;
 };
 
-// GET USER
+// =========================
+// GET USERS
+// =========================
 export const getUsers = async () => {
   const response = await axios.get(
     `${API_URL}/users`
