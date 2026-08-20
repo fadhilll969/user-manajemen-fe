@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 
-import { updateUser } from "../api/userapi";
+import { updateUser } from "../api/userApi";
 // =====================================================
 // TITLE OPTIONS
 // =====================================================
