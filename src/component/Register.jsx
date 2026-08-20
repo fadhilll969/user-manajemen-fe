@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { createUser } from "../api/userApi";
 
 const EMAIL_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@gmail\.com$/;
 
@@ -27,17 +28,21 @@ export default function Register() {
 
     const validateEmail = (value) => {
         if (value.trim() === "") return "Email wajib diisi";
+
         if (!EMAIL_REGEX.test(value.trim())) {
-            return "Masukan email yang valid";
+            return "Masukan email Gmail yang valid";
         }
+
         return "";
     };
 
     const validatePassword = (value) => {
         if (value.trim() === "") return "Kata sandi wajib diisi";
+
         if (value.length < 8) {
             return "Kata sandi minimal 8 karakter";
         }
+
         return "";
     };
 
@@ -71,13 +76,16 @@ export default function Register() {
         }));
     };
 
-    const isFormValid = () =>
-        nama.trim() !== "" &&
-        email.trim() !== "" &&
-        password.trim() !== "" &&
-        !errors.nama &&
-        !errors.email &&
-        !errors.password;
+    const isFormValid = () => {
+        return (
+            nama.trim() !== "" &&
+            email.trim() !== "" &&
+            password.trim() !== "" &&
+            !errors.nama &&
+            !errors.email &&
+            !errors.password
+        );
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -98,53 +106,59 @@ export default function Register() {
         setSubmitting(true);
 
         try {
-            const response = await fetch("https://backend-kamu.up.railway.app", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    nama: nama.trim(),
-                    email: email.trim(),
-                    password: password,
-                }),
+            const data = await createUser({
+                nama: nama.trim(),
+                email: email.trim(),
+                password: password,
             });
 
-            const data = await response.json();
+            console.log("Register berhasil:", data);
 
-            if (!response.ok) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Register gagal",
-                    text: data.message || "Terjadi kesalahan",
-                    confirmButtonColor: "#0B2B8E",
-                });
-
-                setSubmitting(false);
-                return;
-            }
-
-            Swal.fire({
+            await Swal.fire({
                 icon: "success",
                 title: "Register berhasil",
                 text: "Akun berhasil dibuat!",
                 confirmButtonColor: "#0B2B8E",
                 timer: 1500,
                 showConfirmButton: false,
-            }).then(() => {
-                navigate("/");
             });
 
+            navigate("/");
         } catch (error) {
+            console.error("Register error:", error);
+
+            const message =
+                error.response?.data?.message ||
+                error.response?.data?.error ||
+                "Server sedang tidak dapat diakses.";
+
             Swal.fire({
                 icon: "error",
-                title: "Tidak dapat terhubung",
-                text: "Server sedang tidak dapat diakses.",
+                title: "Register gagal",
+                text: message,
                 confirmButtonColor: "#0B2B8E",
             });
         } finally {
             setSubmitting(false);
         }
+    };
+
+    const clearNama = () => {
+        setNama("");
+
+        setErrors((prev) => ({
+            ...prev,
+            nama: "",
+        }));
+    };
+
+    const clearEmail = () => {
+        setEmail("");
+
+        setErrors((prev) => ({
+            ...prev,
+            email: "",
+        }));
     };
 
     return (
@@ -156,7 +170,12 @@ export default function Register() {
                 padding: "24px",
             }}
         >
-            <div style={{ width: "100%", maxWidth: "400px" }}>
+            <div
+                style={{
+                    width: "100%",
+                    maxWidth: "400px",
+                }}
+            >
                 <div
                     className="bg-white p-4"
                     style={{
@@ -173,7 +192,6 @@ export default function Register() {
                     </p>
 
                     <form onSubmit={handleSubmit} noValidate>
-
                         {/* NAMA */}
                         <div className="form-floating position-relative mb-1">
                             <input
@@ -209,13 +227,7 @@ export default function Register() {
                                         top: "50%",
                                         transform: "translateY(-50%)",
                                     }}
-                                    onClick={() => {
-                                        setNama("");
-                                        setErrors((prev) => ({
-                                            ...prev,
-                                            nama: "",
-                                        }));
-                                    }}
+                                    onClick={clearNama}
                                 >
                                     <i className="bi bi-x-lg"></i>
                                 </button>
@@ -263,13 +275,7 @@ export default function Register() {
                                         top: "50%",
                                         transform: "translateY(-50%)",
                                     }}
-                                    onClick={() => {
-                                        setEmail("");
-                                        setErrors((prev) => ({
-                                            ...prev,
-                                            email: "",
-                                        }));
-                                    }}
+                                    onClick={clearEmail}
                                 >
                                     <i className="bi bi-x-lg"></i>
                                 </button>
@@ -285,9 +291,7 @@ export default function Register() {
                         {/* PASSWORD */}
                         <div className="form-floating position-relative mb-1 mt-3">
                             <input
-                                type={
-                                    showPassword ? "text" : "password"
-                                }
+                                type={showPassword ? "text" : "password"}
                                 className={`form-control ${
                                     errors.password ? "is-invalid" : ""
                                 }`}
@@ -295,7 +299,7 @@ export default function Register() {
                                 placeholder="Kata Sandi"
                                 style={{
                                     borderRadius: "8px",
-                                    paddingRight: "34px",
+                                    paddingRight: "45px",
                                     WebkitAppearance: "none",
                                     MozAppearance: "textfield",
                                 }}
@@ -347,16 +351,20 @@ export default function Register() {
                             </div>
                         )}
 
-                         <div className="text-end mb-3 mt-3">
+                        {/* LOGIN LINK */}
+                        <div className="text-end mb-3 mt-3">
                             <a
                                 href="/"
                                 className="small text-dark text-decoration-none fw-semibold"
-                                style={{ color: "#0B2B8E" }}
+                                style={{
+                                    color: "#0B2B8E",
+                                }}
                             >
                                 Sudah Memiliki Akun?
                             </a>
                         </div>
 
+                        {/* REGISTER BUTTON */}
                         <button
                             type="submit"
                             className="btn w-100 fw-semibold text-white text-uppercase"
@@ -370,12 +378,14 @@ export default function Register() {
                                 padding: "12px 0",
                                 letterSpacing: "0.5px",
                                 border: "none",
-                                transition: "background-color 0.2s ease",
+                                transition:
+                                    "background-color 0.2s ease",
                             }}
                         >
                             {submitting ? "Memproses..." : "Daftar"}
                         </button>
 
+                        {/* TERMS */}
                         <p
                             className="text-center text-muted mt-3 mb-0"
                             style={{
@@ -387,7 +397,9 @@ export default function Register() {
                             <a
                                 href="#"
                                 className="fw-semibold text-decoration-none"
-                                style={{ color: "#0B2B8E" }}
+                                style={{
+                                    color: "#0B2B8E",
+                                }}
                             >
                                 Syarat &amp; Ketentuan
                             </a>{" "}
@@ -395,7 +407,9 @@ export default function Register() {
                             <a
                                 href="#"
                                 className="fw-semibold text-decoration-none"
-                                style={{ color: "#0B2B8E" }}
+                                style={{
+                                    color: "#0B2B8E",
+                                }}
                             >
                                 Kebijakan Privasi
                             </a>{" "}
@@ -403,9 +417,12 @@ export default function Register() {
                         </p>
                     </form>
 
+                    {/* COPYRIGHT */}
                     <p
                         className="text-center text-muted mt-4 mb-0"
-                        style={{ fontSize: "11px" }}
+                        style={{
+                            fontSize: "11px",
+                        }}
                     >
                         ©Copyright 2026
                     </p>
@@ -414,4 +431,3 @@ export default function Register() {
         </div>
     );
 }
-
