@@ -6,7 +6,7 @@ import {
   RiSaveLine,
   RiUser3Line,
 } from "react-icons/ri";
-import { updateProfil } from "../../api/userApi";
+import { updateProfil } from "../api/userApi"
 
 export default function Profil() {
   const fileInputRef = useRef(null);
