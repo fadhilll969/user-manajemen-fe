@@ -534,7 +534,7 @@ export default function EditDataUser() {
             await Swal.fire({
                 icon: "success",
                 title: "Perubahan data berhasil disimpan",
-                text: "Data user berhasil diperbarui di database.",
+                text: "Data user berhasil diperbarui",
                 confirmButtonColor:
                     "#0B2B8E",
             });
