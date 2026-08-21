@@ -14,6 +14,7 @@ import UserManagement from "./component/User-Manajemen/UserManagement";
 import TambahDataUser from "./component/User-Manajemen/TambahDataUser";
 import EditDataUser from "./component/User-Manajemen/EditDataUser";
 import Register from "./component/Register";
+import Profil from "./component/Profil";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         {/* sidebar */}
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profil" element={<Profil />} />
           <Route path="/user-management" element={<UserManagement />} />
         </Route>
 

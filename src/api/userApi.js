@@ -85,3 +85,19 @@ export const deleteUser = async (id) => {
   return response.data;
 };
 
+export const updateProfil = async (id, nama, foto) => {
+  const formData = new FormData();
+
+  formData.append("nama", nama);
+
+  if (foto) {
+    formData.append("foto", foto);
+  }
+
+  const response = await axios.put(
+    `${API_URL}/profil/${id}`,
+    formData
+  );
+
+  return response.data;
+};
