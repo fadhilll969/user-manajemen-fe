@@ -3,10 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { tambahDataUser } from "../../api/userApi";
 
-// =====================================================
-// TITLE OPTIONS
-// =====================================================
-
 const TITLE_OPTIONS = [
   {
     value: "Tn",
@@ -22,27 +18,13 @@ const TITLE_OPTIONS = [
   },
 ];
 
-// =====================================================
-// VALIDASI EMAIL
-// Gmail saja
-// =====================================================
-
 const EMAIL_REGEX =
   /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@gmail\.com$/;
-
-// =====================================================
-// VALIDASI PASSWORD
-// Minimal 8 karakter
-// =====================================================
 
 const PASSWORD_REGEX = /^.{8,}$/;
 
 export default function TambahDataUser() {
   const navigate = useNavigate();
-
-  // =====================================================
-  // FORM DATA
-  // =====================================================
 
   const [formData, setFormData] = useState({
     title: "Tn",
@@ -55,10 +37,6 @@ export default function TambahDataUser() {
     confirmPassword: "",
   });
 
-  // =====================================================
-  // ERROR
-  // =====================================================
-
   const [errors, setErrors] = useState({
     nama: "",
     noHandphone: "",
@@ -69,15 +47,7 @@ export default function TambahDataUser() {
     confirmPassword: "",
   });
 
-  // =====================================================
-  // LOADING
-  // =====================================================
-
   const [loading, setLoading] = useState(false);
-
-  // =====================================================
-  // VALIDASI NOMOR HP
-  // =====================================================
 
   const validatePhone = (value) => {
     const digitsOnly = value.replace(/\D/g, "");
@@ -99,10 +69,6 @@ export default function TambahDataUser() {
     return "";
   };
 
-  // =====================================================
-  // VALIDASI EMAIL
-  // =====================================================
-
   const validateEmail = (value) => {
     if (value === "") {
       return "";
@@ -114,10 +80,6 @@ export default function TambahDataUser() {
 
     return "";
   };
-
-  // =====================================================
-  // VALIDASI PASSWORD
-  // =====================================================
 
   const validatePassword = (value) => {
     if (value === "") {
@@ -131,10 +93,6 @@ export default function TambahDataUser() {
     return "";
   };
 
-  // =====================================================
-  // VALIDASI CONFIRM PASSWORD
-  // =====================================================
-
   const validateConfirmPassword = (value, password) => {
     if (value === "") {
       return "";
@@ -147,16 +105,8 @@ export default function TambahDataUser() {
     return "";
   };
 
-  // =====================================================
-  // HANDLE CHANGE
-  // =====================================================
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    // ===================================================
-    // NOMOR HP
-    // ===================================================
 
     if (name === "noHandphone") {
       const digitsOnly = value.replace(/\D/g, "");
@@ -174,10 +124,6 @@ export default function TambahDataUser() {
       return;
     }
 
-    // ===================================================
-    // EMAIL
-    // ===================================================
-
     if (name === "email") {
       setFormData((prev) => ({
         ...prev,
@@ -191,10 +137,6 @@ export default function TambahDataUser() {
 
       return;
     }
-
-    // ===================================================
-    // PASSWORD
-    // ===================================================
 
     if (name === "password") {
       setFormData((prev) => ({
@@ -214,10 +156,6 @@ export default function TambahDataUser() {
       return;
     }
 
-    // ===================================================
-    // CONFIRM PASSWORD
-    // ===================================================
-
     if (name === "confirmPassword") {
       setFormData((prev) => ({
         ...prev,
@@ -235,10 +173,6 @@ export default function TambahDataUser() {
       return;
     }
 
-    // ===================================================
-    // INPUT LAIN
-    // ===================================================
-
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -249,10 +183,6 @@ export default function TambahDataUser() {
       [name]: "",
     }));
   };
-
-  // =====================================================
-  // CLEAR FIELD
-  // =====================================================
 
   const clearField = (name) => {
     setFormData((prev) => ({
@@ -266,11 +196,6 @@ export default function TambahDataUser() {
     }));
   };
 
-  // =====================================================
-  // FORMAT TANGGAL
-  // YYYY-MM-DD → DD-MM-YYYY
-  // =====================================================
-
   const formatTanggalLahir = (isoDate) => {
     if (!isoDate) {
       return "";
@@ -280,10 +205,6 @@ export default function TambahDataUser() {
 
     return `${day}-${month}-${year}`;
   };
-
-  // =====================================================
-  // FORM VALID
-  // =====================================================
 
   const isFormValid = () => {
     return (
@@ -305,20 +226,12 @@ export default function TambahDataUser() {
     );
   };
 
-  // =====================================================
-  // SUBMIT
-  // =====================================================
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (loading) {
       return;
     }
-
-    // ===================================================
-    // VALIDASI
-    // ===================================================
 
     const phoneError =
       validatePhone(formData.noHandphone) ||
@@ -359,10 +272,6 @@ export default function TambahDataUser() {
       ? "Role wajib dipilih"
       : "";
 
-    // ===================================================
-    // JIKA VALIDASI GAGAL
-    // ===================================================
-
     if (
       phoneError ||
       emailError ||
@@ -392,10 +301,6 @@ export default function TambahDataUser() {
       return;
     }
 
-    // ===================================================
-    // DATA YANG DIKIRIM KE BACKEND
-    // ===================================================
-
     const dataUser = {
       title: formData.title,
       nama: formData.nama.trim(),
@@ -415,10 +320,6 @@ export default function TambahDataUser() {
     console.log(dataUser);
     console.log("=================================");
 
-    // ===================================================
-    // KIRIM KE BACKEND
-    // ===================================================
-
     try {
       setLoading(true);
 
@@ -428,10 +329,6 @@ export default function TambahDataUser() {
       console.log("RESPONSE BACKEND:");
       console.log(result);
       console.log("=================================");
-
-      // =================================================
-      // SUCCESS
-      // =================================================
 
       await Swal.fire({
         icon: "success",
@@ -486,10 +383,6 @@ export default function TambahDataUser() {
     }
   };
 
-  // =====================================================
-  // RETURN
-  // =====================================================
-
   return (
     <div
       className="d-flex align-items-start justify-content-center"
@@ -518,8 +411,6 @@ export default function TambahDataUser() {
           onSubmit={handleSubmit}
           noValidate
         >
-          {/* TITLE */}
-
           <div className="mb-3">
             <label className="form-label fw-semibold small">
               Title
@@ -553,8 +444,6 @@ export default function TambahDataUser() {
               ))}
             </div>
           </div>
-
-          {/* NAMA */}
 
           <div className="mb-3">
             <label className="form-label fw-semibold small">
@@ -600,8 +489,6 @@ export default function TambahDataUser() {
               </div>
             )}
           </div>
-
-          {/* NO HP */}
 
           <div className="mb-3">
             <label className="form-label fw-semibold small">
@@ -691,8 +578,6 @@ export default function TambahDataUser() {
             )}
           </div>
 
-          {/* EMAIL */}
-
           <div className="mb-3">
             <label className="form-label fw-semibold small">
               Email
@@ -740,8 +625,6 @@ export default function TambahDataUser() {
             )}
           </div>
 
-          {/* TANGGAL LAHIR */}
-
           <div className="mb-3">
             <label className="form-label fw-semibold small">
               Tanggal Lahir
@@ -770,8 +653,6 @@ export default function TambahDataUser() {
               </div>
             )}
           </div>
-
-          {/* ROLE */}
 
           <div className="mb-3">
             <label className="form-label fw-semibold small">
@@ -815,8 +696,6 @@ export default function TambahDataUser() {
           </div>
 
           <hr className="my-4" />
-
-          {/* PASSWORD */}
 
           <div className="mb-3">
             <label className="form-label fw-semibold small">
@@ -866,8 +745,6 @@ export default function TambahDataUser() {
               </div>
             )}
           </div>
-
-          {/* CONFIRM PASSWORD */}
 
           <div className="mb-4">
             <label className="form-label fw-semibold small">
@@ -920,8 +797,6 @@ export default function TambahDataUser() {
             )}
           </div>
 
-          {/* SIMPAN */}
-
           <button
             type="submit"
             disabled={
@@ -946,8 +821,6 @@ export default function TambahDataUser() {
               ? "Menyimpan..."
               : "Simpan Data"}
           </button>
-
-          {/* KEMBALI */}
 
           <button
             type="button"

@@ -3,25 +3,12 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { loginUser } from "../api/userApi";
 
-// =========================
-// EMAIL REGEX
-// =========================
 
 const EMAIL_REGEX =
     /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@gmail\.com$/;
 
-
-// =========================
-// LOGIN
-// =========================
-
 export default function Login() {
     const navigate = useNavigate();
-
-    // =========================
-    // STATE
-    // =========================
-
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -32,12 +19,6 @@ export default function Login() {
     });
 
     const [submitting, setSubmitting] = useState(false);
-
-
-    // =========================
-    // VALIDASI EMAIL
-    // =========================
-
     const validateEmail = (value) => {
         const emailValue = value.trim();
 
@@ -52,11 +33,6 @@ export default function Login() {
         return "";
     };
 
-
-    // =========================
-    // VALIDASI PASSWORD
-    // =========================
-
     const validatePassword = (value) => {
         if (value === "") {
             return "Kata sandi wajib diisi";
@@ -69,11 +45,6 @@ export default function Login() {
         return "";
     };
 
-
-    // =========================
-    // INPUT EMAIL
-    // =========================
-
     const handleEmailChange = (e) => {
         const value = e.target.value;
 
@@ -84,11 +55,6 @@ export default function Login() {
             email: validateEmail(value),
         }));
     };
-
-
-    // =========================
-    // INPUT PASSWORD
-    // =========================
 
     const handlePasswordChange = (e) => {
         const value = e.target.value;
@@ -101,11 +67,6 @@ export default function Login() {
         }));
     };
 
-
-    // =========================
-    // CEK FORM
-    // =========================
-
     const isFormValid = () => {
         return (
             email.trim() !== "" &&
@@ -115,15 +76,9 @@ export default function Login() {
         );
     };
 
-
-    // =========================
-    // LOGIN
-    // =========================
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validasi
         const emailError = validateEmail(email);
         const passwordError = validatePassword(password);
 
@@ -139,30 +94,14 @@ export default function Login() {
         setSubmitting(true);
 
         try {
-            // =========================
-            // PAYLOAD
-            // =========================
-
             const payload = {
                 email: email.trim(),
                 password: password,
             };
 
             console.log("LOGIN PAYLOAD:", payload);
-
-
-            // =========================
-            // REQUEST BACKEND
-            // =========================
-
             const data = await loginUser(payload);
-
             console.log("LOGIN RESPONSE:", data);
-
-
-            // =========================
-            // SIMPAN USER
-            // =========================
 
             if (data?.user) {
                 localStorage.setItem(
@@ -176,22 +115,12 @@ export default function Login() {
                 );
             }
 
-
-            // =========================
-            // SIMPAN TOKEN
-            // =========================
-
             if (data?.token) {
                 localStorage.setItem(
                     "token",
                     data.token
                 );
             }
-
-
-            // =========================
-            // SUCCESS
-            // =========================
 
             await Swal.fire({
                 icon: "success",
@@ -202,19 +131,10 @@ export default function Login() {
                 showConfirmButton: false,
             });
 
-
-            // =========================
-            // REDIRECT
-            // =========================
-
             navigate("/user-management");
 
         } catch (error) {
             console.error("LOGIN ERROR:", error);
-
-            // =========================
-            // AMBIL PESAN BACKEND
-            // =========================
 
             let message = "Email atau password salah.";
 
@@ -244,11 +164,6 @@ export default function Login() {
         }
     };
 
-
-    // =========================
-    // CLEAR EMAIL
-    // =========================
-
     const clearEmail = () => {
         setEmail("");
 
@@ -257,11 +172,6 @@ export default function Login() {
             email: "",
         }));
     };
-
-
-    // =========================
-    // UI
-    // =========================
 
     return (
         <div
@@ -289,8 +199,6 @@ export default function Login() {
                     }}
                 >
 
-                    {/* TITLE */}
-
                     <h5 className="fw-bold text-center mb-1">
                         Hai, Selamat Datang Kembali!
                     </h5>
@@ -299,26 +207,19 @@ export default function Login() {
                         Memudahkan manajemen dan urus fitur HR
                         dengan mudah
                     </p>
-
-
-                    {/* FORM */}
-
                     <form
                         onSubmit={handleSubmit}
                         noValidate
                     >
 
-                        {/* EMAIL */}
-
                         <div className="form-floating position-relative mb-1">
 
                             <input
                                 type="email"
-                                className={`form-control ${
-                                    errors.email
-                                        ? "is-invalid"
-                                        : ""
-                                }`}
+                                className={`form-control ${errors.email
+                                    ? "is-invalid"
+                                    : ""
+                                    }`}
                                 id="loginEmail"
                                 placeholder="Email"
                                 value={email}
@@ -357,17 +258,11 @@ export default function Login() {
 
                         </div>
 
-
-                        {/* EMAIL ERROR */}
-
                         {errors.email && (
                             <div className="text-danger small mb-2">
                                 {errors.email}
                             </div>
                         )}
-
-
-                        {/* PASSWORD */}
 
                         <div className="form-floating position-relative mb-1 mt-3">
 
@@ -377,11 +272,10 @@ export default function Login() {
                                         ? "text"
                                         : "password"
                                 }
-                                className={`form-control ${
-                                    errors.password
-                                        ? "is-invalid"
-                                        : ""
-                                }`}
+                                className={`form-control ${errors.password
+                                    ? "is-invalid"
+                                    : ""
+                                    }`}
                                 id="loginPassword"
                                 placeholder="Kata Sandi"
                                 value={password}
@@ -423,28 +317,19 @@ export default function Login() {
                                 }
                             >
                                 <i
-                                    className={`bi ${
-                                        showPassword
-                                            ? "bi-eye-slash"
-                                            : "bi-eye"
-                                    }`}
+                                    className={`bi ${showPassword
+                                        ? "bi-eye-slash"
+                                        : "bi-eye"
+                                        }`}
                                 ></i>
                             </button>
 
                         </div>
-
-
-                        {/* PASSWORD ERROR */}
-
                         {errors.password && (
                             <div className="text-danger small mb-2">
                                 {errors.password}
                             </div>
                         )}
-
-
-                        {/* REGISTER */}
-
                         <div className="text-end mb-3 mt-1">
 
                             <button
@@ -461,10 +346,6 @@ export default function Login() {
                             </button>
 
                         </div>
-
-
-                        {/* LOGIN BUTTON */}
-
                         <button
                             type="submit"
                             className="btn w-100 fw-semibold text-white text-uppercase"
@@ -475,7 +356,7 @@ export default function Login() {
                             style={{
                                 backgroundColor:
                                     isFormValid() &&
-                                    !submitting
+                                        !submitting
                                         ? "#0B2B8E"
                                         : "#A0A3BD",
 
@@ -497,10 +378,6 @@ export default function Login() {
                                 : "Masuk"}
 
                         </button>
-
-
-                        {/* TERMS */}
-
                         <p
                             className="text-center text-muted mt-3 mb-0"
                             style={{
@@ -537,10 +414,6 @@ export default function Login() {
                         </p>
 
                     </form>
-
-
-                    {/* COPYRIGHT */}
-
                     <p
                         className="text-center text-muted mt-4 mb-0"
                         style={{

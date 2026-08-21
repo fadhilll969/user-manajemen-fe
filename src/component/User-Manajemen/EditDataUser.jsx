@@ -3,9 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 
 import { updateUser } from "../../api/userApi";
-// =====================================================
-// TITLE OPTIONS
-// =====================================================
 
 const TITLE_OPTIONS = [
     {
@@ -22,25 +19,10 @@ const TITLE_OPTIONS = [
     },
 ];
 
-// =====================================================
-// VALIDASI EMAIL
-// Gmail saja
-// =====================================================
-
 const EMAIL_REGEX =
     /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@gmail\.com$/;
 
-// =====================================================
-// VALIDASI PASSWORD
-// Minimal 8 karakter
-// =====================================================
-
 const PASSWORD_REGEX = /^.{8,}$/;
-
-// =====================================================
-// FORMAT TANGGAL
-// DD-MM-YYYY -> YYYY-MM-DD
-// =====================================================
 
 function toInputDateFormat(value) {
     if (!value) {
@@ -61,24 +43,11 @@ function toInputDateFormat(value) {
     return value;
 }
 
-// =====================================================
-// COMPONENT
-// =====================================================
-
 export default function EditDataUser() {
     const navigate = useNavigate();
     const location = useLocation();
-
-    // =====================================================
-    // USER YANG AKAN DIEDIT
-    // =====================================================
-
     const userToEdit =
         location.state?.user || null;
-
-    // =====================================================
-    // FORM DATA
-    // =====================================================
 
     const [formData, setFormData] = useState({
         title: userToEdit?.title || "Tn",
@@ -106,10 +75,6 @@ export default function EditDataUser() {
             userToEdit?.alasanNonAktif || "",
     });
 
-    // =====================================================
-    // PASSWORD
-    // =====================================================
-
     const [ubahSandi, setUbahSandi] =
         useState(false);
 
@@ -127,10 +92,6 @@ export default function EditDataUser() {
     const [confirmPassword, setConfirmPassword] =
         useState("");
 
-    // =====================================================
-    // ERROR
-    // =====================================================
-
     const [errors, setErrors] = useState({
         noHandphone: "",
         email: "",
@@ -139,19 +100,11 @@ export default function EditDataUser() {
         alasanNonAktif: "",
     });
 
-    // =====================================================
-    // SUBMIT
-    // =====================================================
-
     const [submitting, setSubmitting] =
         useState(false);
 
     const [submitError, setSubmitError] =
         useState("");
-
-    // =====================================================
-    // VALIDASI NOMOR HP
-    // =====================================================
 
     const validatePhone = (value) => {
         const digitsOnly =
@@ -177,10 +130,6 @@ export default function EditDataUser() {
         return "";
     };
 
-    // =====================================================
-    // VALIDASI EMAIL
-    // =====================================================
-
     const validateEmail = (value) => {
         if (value === "") {
             return "";
@@ -193,10 +142,6 @@ export default function EditDataUser() {
         return "";
     };
 
-    // =====================================================
-    // VALIDASI PASSWORD
-    // =====================================================
-
     const validatePassword = (value) => {
         if (value === "") {
             return "";
@@ -208,10 +153,6 @@ export default function EditDataUser() {
 
         return "";
     };
-
-    // =====================================================
-    // VALIDASI CONFIRM PASSWORD
-    // =====================================================
 
     const validateConfirmPassword = (
         value,
@@ -228,19 +169,11 @@ export default function EditDataUser() {
         return "";
     };
 
-    // =====================================================
-    // HANDLE CHANGE
-    // =====================================================
-
     const handleChange = (e) => {
         const {
             name,
             value,
         } = e.target;
-
-        // =================================================
-        // NOMOR HP
-        // =================================================
 
         if (name === "noHandphone") {
             const digitsOnly =
@@ -263,10 +196,6 @@ export default function EditDataUser() {
             return;
         }
 
-        // =================================================
-        // EMAIL
-        // =================================================
-
         if (name === "email") {
             setFormData((prev) => ({
                 ...prev,
@@ -282,18 +211,10 @@ export default function EditDataUser() {
             return;
         }
 
-        // =================================================
-        // INPUT LAIN
-        // =================================================
-
         setFormData((prev) => ({
             ...prev,
             [name]: value,
         }));
-
-        // =================================================
-        // ERROR ALASAN NON AKTIF
-        // =================================================
 
         if (name === "alasanNonAktif") {
             setErrors((prev) => ({
@@ -302,10 +223,6 @@ export default function EditDataUser() {
             }));
         }
     };
-
-    // =====================================================
-    // HANDLE PASSWORD
-    // =====================================================
 
     const handlePasswordChange = (e) => {
         const value = e.target.value;
@@ -326,10 +243,6 @@ export default function EditDataUser() {
         }));
     };
 
-    // =====================================================
-    // HANDLE CONFIRM PASSWORD
-    // =====================================================
-
     const handleConfirmPasswordChange = (
         e
     ) => {
@@ -348,10 +261,6 @@ export default function EditDataUser() {
         }));
     };
 
-    // =====================================================
-    // CLEAR FIELD
-    // =====================================================
-
     const clearField = (name) => {
         setFormData((prev) => ({
             ...prev,
@@ -367,11 +276,6 @@ export default function EditDataUser() {
             }));
         }
     };
-
-    // =====================================================
-    // FORMAT TANGGAL LAHIR
-    // YYYY-MM-DD -> DD-MM-YYYY
-    // =====================================================
 
     const formatTanggalLahir = (
         isoDate
@@ -396,16 +300,8 @@ export default function EditDataUser() {
         return isoDate;
     };
 
-    // =====================================================
-    // STATUS NON ACTIVE
-    // =====================================================
-
     const isNonActive =
         formData.status === "non-active";
-
-    // =====================================================
-    // FORM VALID
-    // =====================================================
 
     const isFormValid = () => {
         const baseValid =
@@ -437,20 +333,12 @@ export default function EditDataUser() {
         );
     };
 
-    // =====================================================
-    // HANDLE SUBMIT
-    // =====================================================
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (submitting) {
             return;
         }
-
-        // =================================================
-        // VALIDASI NOMOR HP
-        // =================================================
 
         const phoneError =
             validatePhone(
@@ -462,10 +350,6 @@ export default function EditDataUser() {
                     : ""
             );
 
-        // =================================================
-        // VALIDASI EMAIL
-        // =================================================
-
         const emailError =
             validateEmail(
                 formData.email
@@ -475,10 +359,6 @@ export default function EditDataUser() {
                     ? "Email wajib diisi"
                     : ""
             );
-
-        // =================================================
-        // VALIDASI PASSWORD
-        // =================================================
 
         let passwordError = "";
         let confirmPasswordError = "";
@@ -506,46 +386,26 @@ export default function EditDataUser() {
                 );
         }
 
-        // =================================================
-        // VALIDASI ALASAN NON AKTIF
-        // =================================================
-
         const alasanError =
             isNonActive &&
-            formData.alasanNonAktif.trim() === ""
+                formData.alasanNonAktif.trim() === ""
                 ? "Alasan non aktif wajib diisi"
                 : "";
-
-        // =================================================
-        // VALIDASI NAMA
-        // =================================================
 
         const namaError =
             !formData.nama.trim()
                 ? "Nama wajib diisi"
                 : "";
 
-        // =================================================
-        // VALIDASI TANGGAL
-        // =================================================
-
         const tanggalError =
             !formData.tanggalLahir
                 ? "Tanggal lahir wajib diisi"
                 : "";
 
-        // =================================================
-        // VALIDASI ROLE
-        // =================================================
-
         const roleError =
             !formData.role
                 ? "Role wajib dipilih"
                 : "";
-
-        // =================================================
-        // JIKA VALIDASI GAGAL
-        // =================================================
 
         if (
             phoneError ||
@@ -585,10 +445,6 @@ export default function EditDataUser() {
             return;
         }
 
-        // =================================================
-        // CEK ID USER
-        // =================================================
-
         if (!userToEdit?.id) {
             Swal.fire({
                 icon: "error",
@@ -605,10 +461,6 @@ export default function EditDataUser() {
         setSubmitError("");
 
         try {
-            // =================================================
-            // DATA YANG DIKIRIM KE BACKEND
-            // =================================================
-
             const bodyData = {
                 title: formData.title,
 
@@ -637,19 +489,10 @@ export default function EditDataUser() {
                         ? formData.alasanNonAktif.trim()
                         : "",
             };
-
-            // =================================================
-            // PASSWORD HANYA DIKIRIM JIKA DIUBAH
-            // =================================================
-
             if (ubahSandi) {
                 bodyData.password =
                     password;
             }
-
-            // =================================================
-            // DEBUG
-            // =================================================
 
             console.log(
                 "================================="
@@ -675,20 +518,11 @@ export default function EditDataUser() {
                 "================================="
             );
 
-            // =================================================
-            // UPDATE USER
-            // TERHUBUNG KE userapi.js
-            // =================================================
-
             const result =
                 await updateUser(
                     userToEdit.id,
                     bodyData
                 );
-
-            // =================================================
-            // RESPONSE BACKEND
-            // =================================================
 
             console.log(
                 "RESPONSE BACKEND:"
@@ -697,11 +531,6 @@ export default function EditDataUser() {
             console.log(
                 result
             );
-
-            // =================================================
-            // SUCCESS
-            // =================================================
-
             await Swal.fire({
                 icon: "success",
                 title: "Perubahan data berhasil disimpan",
@@ -713,11 +542,7 @@ export default function EditDataUser() {
             navigate(
                 "/user-management"
             );
-
         } catch (error) {
-            // =================================================
-            // ERROR
-            // =================================================
 
             console.error(
                 "================================="
@@ -737,10 +562,6 @@ export default function EditDataUser() {
 
             let errorMessage =
                 "Tidak dapat terhubung ke server.";
-
-            // =================================================
-            // ERROR RESPONSE DARI AXIOS
-            // =================================================
 
             if (error.response) {
                 console.error(
@@ -788,10 +609,6 @@ export default function EditDataUser() {
         }
     };
 
-    // =====================================================
-    // RETURN
-    // =====================================================
-
     return (
         <div
             className="d-flex align-items-start justify-content-center"
@@ -808,11 +625,6 @@ export default function EditDataUser() {
                     maxWidth: "480px",
                 }}
             >
-
-                {/* =========================================
-                    ERROR SERVER
-                ========================================= */}
-
                 {submitError && (
                     <div
                         className="d-flex align-items-start justify-content-between p-3 mb-3 rounded-3"
@@ -873,10 +685,6 @@ export default function EditDataUser() {
                     </div>
                 )}
 
-                {/* =========================================
-                    CARD
-                ========================================= */}
-
                 <div
                     className="bg-white p-4"
                     style={{
@@ -897,10 +705,6 @@ export default function EditDataUser() {
                         }
                         noValidate
                     >
-
-                        {/* =================================
-                            TITLE
-                        ================================= */}
 
                         <div className="mb-3">
                             <label className="form-label fw-semibold small">
@@ -948,10 +752,6 @@ export default function EditDataUser() {
 
                             </div>
                         </div>
-
-                        {/* =================================
-                            NAMA
-                        ================================= */}
 
                         <div className="mb-3">
 
@@ -1010,10 +810,6 @@ export default function EditDataUser() {
 
                         </div>
 
-                        {/* =================================
-                            NO HP
-                        ================================= */}
-
                         <div className="mb-3">
 
                             <label className="form-label fw-semibold small">
@@ -1070,11 +866,10 @@ export default function EditDataUser() {
                                     <input
                                         type="text"
                                         inputMode="numeric"
-                                        className={`form-control ${
-                                            errors.noHandphone
-                                                ? "is-invalid"
-                                                : ""
-                                        }`}
+                                        className={`form-control ${errors.noHandphone
+                                            ? "is-invalid"
+                                            : ""
+                                            }`}
                                         style={{
                                             borderRadius:
                                                 "8px",
@@ -1125,10 +920,6 @@ export default function EditDataUser() {
 
                         </div>
 
-                        {/* =================================
-                            EMAIL
-                        ================================= */}
-
                         <div className="mb-3">
 
                             <label className="form-label fw-semibold small">
@@ -1139,11 +930,10 @@ export default function EditDataUser() {
 
                                 <input
                                     type="email"
-                                    className={`form-control ${
-                                        errors.email
-                                            ? "is-invalid"
-                                            : ""
-                                    }`}
+                                    className={`form-control ${errors.email
+                                        ? "is-invalid"
+                                        : ""
+                                        }`}
                                     style={{
                                         borderRadius:
                                             "8px",
@@ -1189,12 +979,7 @@ export default function EditDataUser() {
                                     }
                                 </div>
                             )}
-
                         </div>
-
-                        {/* =================================
-                            TANGGAL LAHIR
-                        ================================= */}
 
                         <div className="mb-3">
 
@@ -1225,10 +1010,6 @@ export default function EditDataUser() {
                             )}
 
                         </div>
-
-                        {/* =================================
-                            ROLE
-                        ================================= */}
 
                         <div className="mb-3">
 
@@ -1278,10 +1059,6 @@ export default function EditDataUser() {
 
                         <hr className="my-4" />
 
-                        {/* =================================
-                            UBAH PASSWORD
-                        ================================= */}
-
                         <div className="mb-3 form-check">
 
                             <input
@@ -1307,10 +1084,6 @@ export default function EditDataUser() {
 
                         </div>
 
-                        {/* =================================
-                            PASSWORD BARU
-                        ================================= */}
-
                         {ubahSandi && (
                             <>
                                 <div className="mb-3">
@@ -1327,11 +1100,10 @@ export default function EditDataUser() {
                                                     ? "text"
                                                     : "password"
                                             }
-                                            className={`form-control ${
-                                                errors.password
-                                                    ? "is-invalid"
-                                                    : ""
-                                            }`}
+                                            className={`form-control ${errors.password
+                                                ? "is-invalid"
+                                                : ""
+                                                }`}
                                             id="editPasswordBaru"
                                             style={{
                                                 borderRadius:
@@ -1369,11 +1141,10 @@ export default function EditDataUser() {
                                             }
                                         >
                                             <i
-                                                className={`bi ${
-                                                    showPassword
-                                                        ? "bi-eye-slash"
-                                                        : "bi-eye"
-                                                }`}
+                                                className={`bi ${showPassword
+                                                    ? "bi-eye-slash"
+                                                    : "bi-eye"
+                                                    }`}
                                             ></i>
                                         </button>
 
@@ -1386,12 +1157,7 @@ export default function EditDataUser() {
                                             }
                                         </div>
                                     )}
-
                                 </div>
-
-                                {/* =================================
-                                    CONFIRM PASSWORD
-                                ================================= */}
 
                                 <div className="mb-4">
 
@@ -1407,11 +1173,10 @@ export default function EditDataUser() {
                                                     ? "text"
                                                     : "password"
                                             }
-                                            className={`form-control ${
-                                                errors.confirmPassword
-                                                    ? "is-invalid"
-                                                    : ""
-                                            }`}
+                                            className={`form-control ${errors.confirmPassword
+                                                ? "is-invalid"
+                                                : ""
+                                                }`}
                                             id="editPasswordKonfirmasi"
                                             style={{
                                                 borderRadius:
@@ -1449,11 +1214,10 @@ export default function EditDataUser() {
                                             }
                                         >
                                             <i
-                                                className={`bi ${
-                                                    showConfirmPassword
-                                                        ? "bi-eye-slash"
-                                                        : "bi-eye"
-                                                }`}
+                                                className={`bi ${showConfirmPassword
+                                                    ? "bi-eye-slash"
+                                                    : "bi-eye"
+                                                    }`}
                                             ></i>
                                         </button>
 
@@ -1480,10 +1244,6 @@ export default function EditDataUser() {
                             </>
                         )}
 
-                        {/* =================================
-                            ALASAN NON AKTIF
-                        ================================= */}
-
                         {isNonActive && (
                             <div className="mb-4">
 
@@ -1492,11 +1252,10 @@ export default function EditDataUser() {
                                 </label>
 
                                 <textarea
-                                    className={`form-control ${
-                                        errors.alasanNonAktif
-                                            ? "is-invalid"
-                                            : ""
-                                    }`}
+                                    className={`form-control ${errors.alasanNonAktif
+                                        ? "is-invalid"
+                                        : ""
+                                        }`}
                                     style={{
                                         borderRadius:
                                             "8px",
@@ -1523,10 +1282,6 @@ export default function EditDataUser() {
                             </div>
                         )}
 
-                        {/* =================================
-                            SIMPAN
-                        ================================= */}
-
                         <button
                             type="submit"
                             className="btn w-100 fw-semibold text-white text-uppercase"
@@ -1537,7 +1292,7 @@ export default function EditDataUser() {
                             style={{
                                 backgroundColor:
                                     isFormValid() &&
-                                    !submitting
+                                        !submitting
                                         ? "#0B2B8E"
                                         : "#A0A3BD",
 
@@ -1561,10 +1316,6 @@ export default function EditDataUser() {
                                 ? "Menyimpan..."
                                 : "Simpan Perubahan"}
                         </button>
-
-                        {/* =================================
-                            KEMBALI
-                        ================================= */}
 
                         <button
                             type="button"
@@ -1600,10 +1351,6 @@ export default function EditDataUser() {
                     </form>
                 </div>
 
-                {/* =========================================
-                    CATATAN NON ACTIVE
-                ========================================= */}
-
                 {isNonActive && (
                     <div className="text-muted small mt-3 px-2">
 
@@ -1625,7 +1372,6 @@ export default function EditDataUser() {
                         </strong>{" "}
 
                         yang wajib diisi.
-
                     </div>
                 )}
 

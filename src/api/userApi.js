@@ -3,9 +3,6 @@ import axios from "axios";
 const API_URL =
   "https://user-manajemen-be-production.up.railway.app";
 
-// =========================
-// REGISTER
-// =========================
 
 export const createUser = async (data) => {
   const response = await axios.post(
@@ -21,9 +18,20 @@ export const createUser = async (data) => {
   return response.data;
 };
 
-// =========================
-// GET SEMUA USER
-// =========================
+export const loginUser = async (data) => {
+  const response = await axios.post(
+    `${API_URL}/login`,
+    data,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return response.data;
+};
+
 
 export const getUsers = async () => {
   const response = await axios.get(
@@ -32,10 +40,6 @@ export const getUsers = async () => {
 
   return response.data;
 };
-
-// =========================
-// TAMBAH USER
-// =========================
 
 export const tambahDataUser = async (data) => {
   const response = await axios.post(
@@ -51,10 +55,6 @@ export const tambahDataUser = async (data) => {
   return response.data;
 };
 
-// =========================
-// GET USER BY ID
-// =========================
-
 export const getUser = async (id) => {
   const response = await axios.get(
     `${API_URL}/users/${id}`
@@ -62,10 +62,6 @@ export const getUser = async (id) => {
 
   return response.data;
 };
-
-// =========================
-// UPDATE USER
-// =========================
 
 export const updateUser = async (id, data) => {
   const response = await axios.put(
@@ -81,10 +77,6 @@ export const updateUser = async (id, data) => {
   return response.data;
 };
 
-// =========================
-// DELETE USER
-// =========================
-
 export const deleteUser = async (id) => {
   const response = await axios.delete(
     `${API_URL}/users/${id}`
@@ -93,20 +85,3 @@ export const deleteUser = async (id) => {
   return response.data;
 };
 
-// =========================
-// LOGIN
-// =========================
-
-export const loginUser = async (data) => {
-  const response = await axios.post(
-    `${API_URL}/login`,
-    data,
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  return response.data;
-};

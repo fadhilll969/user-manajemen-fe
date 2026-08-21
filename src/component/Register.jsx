@@ -8,7 +8,6 @@ const EMAIL_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@gmail\.com$/;
 export default function Register() {
     const navigate = useNavigate();
 
-    // Field SESUAI dengan Backend
     const [nama, setNama] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -22,10 +21,6 @@ export default function Register() {
     });
 
     const [submitting, setSubmitting] = useState(false);
-
-    // =========================
-    // VALIDASI
-    // =========================
 
     const validateNama = (value) => {
         if (value.trim() === "") {
@@ -61,10 +56,6 @@ export default function Register() {
         return "";
     };
 
-    // =========================
-    // HANDLE INPUT
-    // =========================
-
     const handleNamaChange = (e) => {
         const value = e.target.value;
 
@@ -98,10 +89,6 @@ export default function Register() {
         }));
     };
 
-    // =========================
-    // CEK FORM
-    // =========================
-
     const isFormValid = () => {
         return (
             nama.trim() !== "" &&
@@ -112,10 +99,6 @@ export default function Register() {
             !errors.password
         );
     };
-
-    // =========================
-    // REGISTER
-    // =========================
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -137,7 +120,6 @@ export default function Register() {
         setSubmitting(true);
 
         try {
-            // DATA YANG DIKIRIM KE BACKEND
             const payload = {
                 nama: nama.trim(),
                 email: email.trim(),
@@ -159,7 +141,6 @@ export default function Register() {
                 showConfirmButton: false,
             });
 
-            // Kembali ke LOGIN
             navigate("/");
         } catch (error) {
             console.error("Register error:", error);
@@ -180,10 +161,6 @@ export default function Register() {
         }
     };
 
-    // =========================
-    // CLEAR INPUT
-    // =========================
-
     const clearNama = () => {
         setNama("");
 
@@ -201,10 +178,6 @@ export default function Register() {
             email: "",
         }));
     };
-
-    // =========================
-    // UI
-    // =========================
 
     return (
         <div
@@ -238,7 +211,6 @@ export default function Register() {
 
                     <form onSubmit={handleSubmit} noValidate>
 
-                        {/* NAMA */}
                         <div className="form-floating position-relative mb-1">
                             <input
                                 type="text"
@@ -286,7 +258,6 @@ export default function Register() {
                             </div>
                         )}
 
-                        {/* EMAIL */}
                         <div className="form-floating position-relative mb-1 mt-3">
                             <input
                                 type="email"
@@ -334,7 +305,6 @@ export default function Register() {
                             </div>
                         )}
 
-                        {/* PASSWORD */}
                         <div className="form-floating position-relative mb-1 mt-3">
                             <input
                                 type={
@@ -390,7 +360,6 @@ export default function Register() {
                             </div>
                         )}
 
-                        {/* LOGIN */}
                         <div className="text-end mb-3 mt-3">
                             <button
                                 type="button"
@@ -404,7 +373,6 @@ export default function Register() {
                             </button>
                         </div>
 
-                        {/* REGISTER */}
                         <button
                             type="submit"
                             className="btn w-100 fw-semibold text-white text-uppercase"
@@ -429,7 +397,6 @@ export default function Register() {
                                 : "Daftar"}
                         </button>
 
-                        {/* TERMS */}
                         <p
                             className="text-center text-muted mt-3 mb-0"
                             style={{
@@ -461,7 +428,6 @@ export default function Register() {
                         </p>
                     </form>
 
-                    {/* COPYRIGHT */}
                     <p
                         className="text-center text-muted mt-4 mb-0"
                         style={{

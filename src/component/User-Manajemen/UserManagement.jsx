@@ -9,9 +9,6 @@ import {
   deleteUser,
 } from "../../api/userApi";
 
-// =========================
-// MONTH
-// =========================
 
 const MONTHS_ID = [
   "Januari",
@@ -38,10 +35,6 @@ const DAY_LABELS = [
   "Su",
 ];
 
-// =========================
-// CALENDAR
-// =========================
-
 function getMonthCells(year, month) {
   const firstDay = new Date(year, month, 1);
 
@@ -62,7 +55,6 @@ function getMonthCells(year, month) {
 
   const cells = [];
 
-  // Previous month
   for (let i = startWeekday - 1; i >= 0; i--) {
     const day = daysInPrevMonth - i;
 
@@ -77,7 +69,6 @@ function getMonthCells(year, month) {
     });
   }
 
-  // Current month
   for (let d = 1; d <= daysInMonth; d++) {
     cells.push({
       day: d,
@@ -90,8 +81,7 @@ function getMonthCells(year, month) {
     });
   }
 
-  // Next month
-  let nextDay = 1;
+   let nextDay = 1;
 
   while (cells.length % 7 !== 0) {
     cells.push({
@@ -110,10 +100,6 @@ function getMonthCells(year, month) {
   return cells;
 }
 
-// =========================
-// FORMAT DATE
-// =========================
-
 function formatTanggal(date) {
   if (!date) return "";
 
@@ -121,10 +107,6 @@ function formatTanggal(date) {
     MONTHS_ID[date.getMonth()]
   } ${date.getFullYear()}`;
 }
-
-// =========================
-// SAME DAY
-// =========================
 
 function sameDay(a, b) {
   return (
@@ -135,10 +117,6 @@ function sameDay(a, b) {
     a.getDate() === b.getDate()
   );
 }
-
-// =========================
-// MINI CALENDAR
-// =========================
 
 function MiniCalendar({
   monthDate,
@@ -169,7 +147,6 @@ function MiniCalendar({
 
   return (
     <div style={{ width: "230px" }}>
-      {/* HEADER */}
 
       <div className="d-flex justify-content-between align-items-center mb-2">
         <button
@@ -201,7 +178,6 @@ function MiniCalendar({
         </button>
       </div>
 
-      {/* CALENDAR */}
 
       <div
         className="d-grid"
@@ -211,8 +187,6 @@ function MiniCalendar({
           rowGap: "4px",
         }}
       >
-        {/* DAY */}
-
         {DAY_LABELS.map((d) => (
           <div
             key={d}
@@ -224,8 +198,6 @@ function MiniCalendar({
             {d}
           </div>
         ))}
-
-        {/* DATE */}
 
         {cells.map((cell, idx) => {
           const isStart = sameDay(
@@ -281,16 +253,8 @@ function MiniCalendar({
   );
 }
 
-// =========================
-// MAIN COMPONENT
-// =========================
-
 export default function UserManagement() {
   const navigate = useNavigate();
-
-  // =========================
-  // STATE
-  // =========================
 
   const [activeTab, setActiveTab] =
     useState("active");
@@ -310,10 +274,6 @@ export default function UserManagement() {
   const [showDetail, setShowDetail] =
     useState(false);
 
-  // =========================
-  // DELETE / NON ACTIVE
-  // =========================
-
   const [userToDelete, setUserToDelete] =
     useState(null);
 
@@ -330,10 +290,6 @@ export default function UserManagement() {
     setDeleteReasonError,
   ] = useState("");
 
-  // =========================
-  // REACTIVATE
-  // =========================
-
   const [
     userToReactivate,
     setUserToReactivate,
@@ -344,10 +300,6 @@ export default function UserManagement() {
     setShowReactivateConfirm,
   ] = useState(false);
 
-  // =========================
-  // PERMANENT DELETE
-  // =========================
-
   const [
     userToPermanentDelete,
     setUserToPermanentDelete,
@@ -357,10 +309,6 @@ export default function UserManagement() {
     showPermanentDeleteConfirm,
     setShowPermanentDeleteConfirm,
   ] = useState(false);
-
-  // =========================
-  // CALENDAR
-  // =========================
 
   const today = new Date();
 
@@ -397,11 +345,6 @@ export default function UserManagement() {
     useState(
       "4 April 2023 - 16 Juli 2023"
     );
-
-  // =====================================================
-  // GET USERS
-  // GET /users
-  // =====================================================
 
   const fetchUsers = async () => {
     try {
@@ -456,18 +399,9 @@ export default function UserManagement() {
     }
   };
 
-  // =========================
-  // LOAD DATA
-  // =========================
-
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  // =====================================================
-  // NON ACTIVE
-  // PUT /users/{id}
-  // =====================================================
 
   const handleDeleteClick = (user) => {
     setUserToDelete(user);
@@ -541,11 +475,6 @@ export default function UserManagement() {
     }
   };
 
-  // =====================================================
-  // REACTIVATE
-  // PUT /users/{id}
-  // =====================================================
-
   const handleReactivateClick = (user) => {
     setUserToReactivate(user);
 
@@ -601,11 +530,6 @@ export default function UserManagement() {
         });
       }
     };
-
-  // =====================================================
-  // PERMANENT DELETE
-  // DELETE /users/{id}
-  // =====================================================
 
   const handlePermanentDeleteClick =
     (user) => {
@@ -665,19 +589,11 @@ export default function UserManagement() {
       }
     };
 
-  // =====================================================
-  // DETAIL
-  // =====================================================
-
   const handleViewDetail = (user) => {
     setSelectedUser(user);
 
     setShowDetail(true);
   };
-
-  // =====================================================
-  // CALENDAR
-  // =====================================================
 
   const handleDayClick = (date) => {
     if (
@@ -712,10 +628,6 @@ export default function UserManagement() {
     setShowDatePicker(false);
   };
 
-  // =====================================================
-  // FILTER
-  // =====================================================
-
   const filteredUsers = users.filter(
     (user) => {
       const matchesSearch =
@@ -739,10 +651,6 @@ export default function UserManagement() {
     }
   );
 
-  // =====================================================
-  // TITLE COLOR
-  // =====================================================
-
   const titleColor = {
     Tn: {
       bg: "#E6F0FF",
@@ -760,21 +668,12 @@ export default function UserManagement() {
     },
   };
 
-  // =====================================================
-  // RETURN
-  // =====================================================
 
   return (
     <div className="p-3 min-vh-100">
       <div className="border-0 shadow-sm rounded-4 p-3 bg-light">
 
-        {/* =====================================================
-            SUMMARY CARD
-        ===================================================== */}
-
         <div className="row mb-4 g-3">
-
-          {/* TOTAL MEMBER */}
 
           <div className="col-md-4">
             <div
@@ -819,8 +718,6 @@ export default function UserManagement() {
               </h2>
             </div>
           </div>
-
-          {/* MEMBER BARU */}
 
           <div className="col-md-5">
             <div
@@ -873,10 +770,6 @@ export default function UserManagement() {
           </div>
         </div>
 
-        {/* =====================================================
-            TABLE CONTAINER
-        ===================================================== */}
-
         <div
           className="bg-white p-4"
           style={{
@@ -885,10 +778,6 @@ export default function UserManagement() {
               "0 2px 12px rgba(16,24,40,0.05)",
           }}
         >
-
-          {/* =====================================================
-              TAB
-          ===================================================== */}
 
           <div className="border-bottom mb-3">
 
@@ -926,16 +815,9 @@ export default function UserManagement() {
             >
               Non Active
             </button>
-
           </div>
 
-          {/* =====================================================
-              SEARCH / FILTER
-          ===================================================== */}
-
           <div className="row g-2 align-items-center mb-3 position-relative">
-
-            {/* SEARCH */}
 
             <div className="col-md-4">
               <div className="input-group">
@@ -968,8 +850,6 @@ export default function UserManagement() {
 
               </div>
             </div>
-
-            {/* DATE */}
 
             <div className="col-md-5">
               <div
@@ -1007,8 +887,6 @@ export default function UserManagement() {
                 />
 
               </div>
-
-              {/* DATE PICKER */}
 
               {showDatePicker && (
                 <div
@@ -1166,8 +1044,6 @@ export default function UserManagement() {
               )}
             </div>
 
-            {/* BUTTON CREATE */}
-
             <div className="col-md-3 text-end">
               <button
                 className="btn btn-primary w-100 fw-semibold d-flex align-items-center justify-content-center gap-2"
@@ -1189,15 +1065,9 @@ export default function UserManagement() {
                 Buat User Baru
               </button>
             </div>
-
           </div>
 
-          {/* =====================================================
-              TABLE
-          ===================================================== */}
-
           <div className="table-responsive">
-
             <table
               className="table align-middle text-nowrap mb-0"
               style={{
@@ -1258,15 +1128,9 @@ export default function UserManagement() {
                   >
                     AKSI
                   </th>
-
                 </tr>
-
               </thead>
-
               <tbody>
-
-                {/* LOADING */}
-
                 {loading ? (
                   <tr>
                     <td
@@ -1342,15 +1206,9 @@ export default function UserManagement() {
                               "1px solid #F0F2F5",
                           }}
                         >
-
-                          {/* NO */}
-
                           <td className="ps-3">
                             {index + 1}
                           </td>
-
-                          {/* TITLE */}
-
                           <td>
                             <span
                               className="fw-semibold px-2 py-1"
@@ -1369,37 +1227,22 @@ export default function UserManagement() {
                                 "-"}
                             </span>
                           </td>
-
-                          {/* NAMA */}
-
                           <td className="fw-medium text-dark">
                             {user.nama ||
                               "-"}
                           </td>
-
-                          {/* PHONE */}
-
                           <td>
                             {user.noHandphone ||
                               "-"}
                           </td>
-
-                          {/* EMAIL */}
-
                           <td>
                             {user.email ||
                               "-"}
                           </td>
-
-                          {/* DOB */}
-
                           <td>
                             {user.tanggalLahir ||
                               "-"}
                           </td>
-
-                          {/* ROLE */}
-
                           <td>
                             <span
                               className="fw-semibold px-2 py-1"
@@ -1424,13 +1267,7 @@ export default function UserManagement() {
                                 "-"}
                             </span>
                           </td>
-
-                          {/* ACTION */}
-
                           <td className="text-center">
-
-                            {/* DETAIL */}
-
                             <button
                               className="btn btn-link text-secondary p-1 me-1"
                               title="Lihat Detail"
@@ -1442,9 +1279,6 @@ export default function UserManagement() {
                             >
                               <i className="bi bi-eye"></i>
                             </button>
-
-                            {/* EDIT */}
-
                             <button
                               className="btn btn-link text-secondary p-1 me-1"
                               title="Edit"
@@ -1461,14 +1295,9 @@ export default function UserManagement() {
                             >
                               <i className="bi bi-pencil"></i>
                             </button>
-
-                            {/* NON ACTIVE */}
-
                             {user.status ===
                             "non-active" ? (
                               <>
-                                {/* REACTIVATE */}
-
                                 <button
                                   className="btn btn-link p-1 me-1"
                                   style={{
@@ -1484,9 +1313,6 @@ export default function UserManagement() {
                                 >
                                   <i className="bi bi-arrow-counterclockwise"></i>
                                 </button>
-
-                                {/* PERMANENT DELETE */}
-
                                 <button
                                   className="btn btn-link text-danger p-1"
                                   title="Hapus Permanen"
@@ -1525,16 +1351,10 @@ export default function UserManagement() {
                 )}
 
               </tbody>
-
             </table>
-
           </div>
         </div>
       </div>
-
-      {/* =====================================================
-          DETAIL MODAL
-      ===================================================== */}
 
       <Modal
         show={showDetail}
@@ -1633,10 +1453,6 @@ export default function UserManagement() {
 
         </Modal.Body>
       </Modal>
-
-      {/* =====================================================
-          DELETE / NON ACTIVE MODAL
-      ===================================================== */}
 
       <Modal
         show={showDeleteConfirm}
@@ -1750,10 +1566,6 @@ export default function UserManagement() {
         </Modal.Body>
       </Modal>
 
-      {/* =====================================================
-          REACTIVATE MODAL
-      ===================================================== */}
-
       <Modal
         show={showReactivateConfirm}
         onHide={
@@ -1833,10 +1645,6 @@ export default function UserManagement() {
 
         </Modal.Body>
       </Modal>
-
-      {/* =====================================================
-          PERMANENT DELETE MODAL
-      ===================================================== */}
 
       <Modal
         show={
@@ -1925,10 +1733,6 @@ export default function UserManagement() {
     </div>
   );
 }
-
-// =====================================================
-// DETAIL ROW
-// =====================================================
 
 function DetailRow({
   label,
