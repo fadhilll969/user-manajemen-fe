@@ -5,7 +5,7 @@ import React, {
 } from "react";
 
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 import {
@@ -21,6 +21,8 @@ const API_URL =
 
 
 const Profil = () => {
+
+        const navigate = useNavigate();
 
     const fileInputRef =
         useRef(null);
@@ -330,30 +332,15 @@ const Profil = () => {
     // BATAL
     // =========================================
 
-    const handleBatal = () => {
+   const handleBatal = () => {
+    setFoto(null);
 
-        setFoto(
-            null
-        );
+    if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+    }
 
-
-        if (
-            fileInputRef.current
-        ) {
-
-            fileInputRef.current.value =
-                "";
-
-        }
-
-
-        setNama(
-            localStorage.getItem(
-                "nama"
-            ) || ""
-        );
-
-    };
+    navigate("/user-manajemen");
+};
 
 
     // =========================================
