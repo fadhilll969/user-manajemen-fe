@@ -51,11 +51,6 @@ const Profil = () => {
     const [profilAda, setProfilAda] =
         useState(false);
 
-
-    // =========================================
-    // AMBIL PROFIL
-    // =========================================
-
     useEffect(() => {
 
         const getProfil = async () => {
@@ -90,11 +85,6 @@ const Profil = () => {
                     true
                 );
 
-
-                // =========================================
-                // FOTO
-                // =========================================
-
                 if (data.foto) {
 
                     const fotoUrl =
@@ -124,11 +114,6 @@ const Profil = () => {
 
                 }
 
-
-                // =========================================
-                // NAMA UNTUK SIDEBAR
-                // =========================================
-
                 localStorage.setItem(
                     "nama",
                     data.nama || ""
@@ -151,7 +136,6 @@ const Profil = () => {
                 );
 
 
-                // Kalau profil belum dibuat
                 if (
                     error.response?.status === 404
                 ) {
@@ -182,34 +166,19 @@ const Profil = () => {
                             "Gagal mengambil profil",
 
                         text:
-
                             error.response?.data?.message ||
-
                             "Terjadi kesalahan saat mengambil profil.",
-
                     });
-
-                }
-
+              }
             } finally {
 
                 setLoading(
                     false
                 );
-
             }
-
         };
-
-
         getProfil();
-
     }, []);
-
-
-    // =========================================
-    // PILIH FOTO
-    // =========================================
 
     const handleFotoChange = (
         e
@@ -224,11 +193,6 @@ const Profil = () => {
             return;
 
         }
-
-
-        // =========================================
-        // CEK FORMAT
-        // =========================================
 
         const allowedTypes = [
 
@@ -259,17 +223,9 @@ const Profil = () => {
 
             });
 
-
             e.target.value = "";
-
             return;
-
         }
-
-
-        // =========================================
-        // CEK UKURAN
-        // =========================================
 
         if (
             file.size >
@@ -285,20 +241,11 @@ const Profil = () => {
 
                 text:
                     "Ukuran foto maksimal 2 MB.",
-
             });
 
-
             e.target.value = "";
-
             return;
-
         }
-
-
-        // =========================================
-        // PREVIEW
-        // =========================================
 
         const preview =
             URL.createObjectURL(
@@ -316,21 +263,11 @@ const Profil = () => {
 
     };
 
-
-    // =========================================
-    // BUKA FILE
-    // =========================================
-
     const handlePilihFoto = () => {
 
         fileInputRef.current?.click();
 
     };
-
-
-    // =========================================
-    // BATAL
-    // =========================================
 
    const handleBatal = () => {
     setFoto(null);
@@ -339,13 +276,9 @@ const Profil = () => {
         fileInputRef.current.value = "";
     }
 
-    navigate("/user-manajemen");
+    navigate("/user-management");
 };
 
-
-    // =========================================
-    // SIMPAN PROFIL
-    // =========================================
 
     const handleSubmit = async (
         e
@@ -412,11 +345,6 @@ const Profil = () => {
 
             let response;
 
-
-            // =========================================
-            // PROFIL SUDAH ADA = UPDATE
-            // =========================================
-
             if (profilAda) {
 
                 response =
@@ -429,10 +357,6 @@ const Profil = () => {
                     );
 
             }
-
-            // =========================================
-            // PROFIL BELUM ADA = CREATE
-            // =========================================
 
             else {
 
@@ -457,11 +381,6 @@ const Profil = () => {
             const data =
                 response.data.data;
 
-
-            // =========================================
-            // UPDATE STATE NAMA
-            // =========================================
-
             setNama(
                 data.nama
             );
@@ -474,12 +393,6 @@ const Profil = () => {
                 data.nama
 
             );
-
-
-            // =========================================
-            // UPDATE FOTO
-            // =========================================
-
             if (
                 data.foto
             ) {
@@ -523,8 +436,6 @@ const Profil = () => {
 
             }
 
-
-            // Update sidebar
             window.dispatchEvent(
 
                 new Event(
@@ -589,19 +500,9 @@ const Profil = () => {
 
     };
 
-
-    // =========================================
-    // FOTO YANG DITAMPILKAN
-    // =========================================
-
     const previewFoto =
         foto?.preview ||
         fotoAwal;
-
-
-    // =========================================
-    // LOADING
-    // =========================================
 
     if (loading) {
 
@@ -639,11 +540,6 @@ const Profil = () => {
                 }}
             >
 
-
-                {/* ========================================= */}
-                {/* HEADER */}
-                {/* ========================================= */}
-
                 <div
                     className="mb-4"
                 >
@@ -663,11 +559,6 @@ const Profil = () => {
 
                 </div>
 
-
-                {/* ========================================= */}
-                {/* CARD */}
-                {/* ========================================= */}
-
                 <div
                     className="card border-0 shadow-sm"
                 >
@@ -683,11 +574,6 @@ const Profil = () => {
                             <div
                                 className="row align-items-center"
                             >
-
-
-                                {/* ========================================= */}
-                                {/* FOTO */}
-                                {/* ========================================= */}
 
                                 <div
                                     className="col-md-4 text-center mb-4 mb-md-0"
@@ -801,11 +687,6 @@ const Profil = () => {
 
                                 </div>
 
-
-                                {/* ========================================= */}
-                                {/* FORM */}
-                                {/* ========================================= */}
-
                                 <div
                                     className="col-md-8"
                                 >
@@ -863,11 +744,6 @@ const Profil = () => {
 
                                     </div>
 
-
-                                    {/* ========================================= */}
-                                    {/* INFO */}
-                                    {/* ========================================= */}
-
                                     <div
                                         className="p-3 rounded mb-4"
                                         style={{
@@ -908,11 +784,6 @@ const Profil = () => {
                                         </div>
 
                                     </div>
-
-
-                                    {/* ========================================= */}
-                                    {/* BUTTON */}
-                                    {/* ========================================= */}
 
                                     <div
                                         className="d-flex justify-content-end gap-2"
