@@ -5,6 +5,7 @@ import React, {
 } from "react";
 
 import axios from "axios";
+
 import Swal from "sweetalert2";
 
 import {
@@ -19,59 +20,59 @@ const API_URL =
     "https://user-manajemen-be-production.up.railway.app";
 
 
-export default function Profil() {
+const Profil = () => {
 
     const fileInputRef =
         useRef(null);
 
 
-    // PAKAI ID PROFIL
-    const profilId =
-        localStorage.getItem("profilId");
+    const [nama, setNama] =
+        useState("");
 
-
-    const [nama, setNama] = useState(
-        localStorage.getItem("nama") || ""
-    );
 
     const [fotoAwal, setFotoAwal] =
-        useState(
-            localStorage.getItem("foto") || null
-        );
+        useState(null);
+
 
     const [foto, setFoto] =
         useState(null);
 
+
     const [loading, setLoading] =
+        useState(true);
+
+
+    const [saving, setSaving] =
         useState(false);
 
 
-    // ==========================================
-    // LOAD PROFIL
-    // ==========================================
+    const [profilAda, setProfilAda] =
+        useState(false);
+
+
+    // =========================================
+    // AMBIL PROFIL
+    // =========================================
 
     useEffect(() => {
 
-        const loadProfil = async () => {
-
-            if (!profilId) {
-
-                console.error(
-                    "PROFIL ID TIDAK ADA"
-                );
-
-                return;
-
-            }
+        const getProfil = async () => {
 
             try {
 
+                setLoading(true);
+
+
                 const response =
                     await axios.get(
-
-                        `${API_URL}/profil/${profilId}`
-
+                        `${API_URL}/profil`
                     );
+
+
+                console.log(
+                    "DATA PROFIL:",
+                    response.data
+                );
 
 
                 const data =
@@ -83,19 +84,18 @@ export default function Profil() {
                 );
 
 
-                localStorage.setItem(
-
-                    "nama",
-
-                    data.nama || ""
-
+                setProfilAda(
+                    true
                 );
 
+
+                // =========================================
+                // FOTO
+                // =========================================
 
                 if (data.foto) {
 
                     const fotoUrl =
-
                         `${API_URL}/uploads/profil/${data.foto}`;
 
 
@@ -105,16 +105,16 @@ export default function Profil() {
 
 
                     localStorage.setItem(
-
                         "foto",
-
                         fotoUrl
-
                     );
 
                 } else {
 
-                    setFotoAwal(null);
+                    setFotoAwal(
+                        null
+                    );
+
 
                     localStorage.removeItem(
                         "foto"
@@ -122,15 +122,77 @@ export default function Profil() {
 
                 }
 
+
+                // =========================================
+                // NAMA UNTUK SIDEBAR
+                // =========================================
+
+                localStorage.setItem(
+                    "nama",
+                    data.nama || ""
+                );
+
+
+                window.dispatchEvent(
+                    new Event(
+                        "profilUpdated"
+                    )
+                );
+
+
             } catch (error) {
 
                 console.error(
-
-                    "ERROR LOAD PROFIL:",
-
+                    "ERROR GET PROFIL:",
                     error.response?.data ||
                     error
+                );
 
+
+                // Kalau profil belum dibuat
+                if (
+                    error.response?.status === 404
+                ) {
+
+                    setProfilAda(
+                        false
+                    );
+
+
+                    setNama(
+                        localStorage.getItem(
+                            "nama"
+                        ) || ""
+                    );
+
+
+                    setFotoAwal(
+                        null
+                    );
+
+                } else {
+
+                    Swal.fire({
+
+                        icon: "error",
+
+                        title:
+                            "Gagal mengambil profil",
+
+                        text:
+
+                            error.response?.data?.message ||
+
+                            "Terjadi kesalahan saat mengambil profil.",
+
+                    });
+
+                }
+
+            } finally {
+
+                setLoading(
+                    false
                 );
 
             }
@@ -138,27 +200,48 @@ export default function Profil() {
         };
 
 
-        loadProfil();
+        getProfil();
 
-    }, [profilId]);
+    }, []);
 
 
-    // ==========================================
+    // =========================================
     // PILIH FOTO
-    // ==========================================
+    // =========================================
 
-    const handleFotoChange = (e) => {
+    const handleFotoChange = (
+        e
+    ) => {
 
         const file =
-            e.target.files[0];
+            e.target.files?.[0];
 
 
-        if (!file) return;
+        if (!file) {
+
+            return;
+
+        }
+
+
+        // =========================================
+        // CEK FORMAT
+        // =========================================
+
+        const allowedTypes = [
+
+            "image/jpeg",
+
+            "image/png",
+
+            "image/webp"
+
+        ];
 
 
         if (
-            !file.type.startsWith(
-                "image/"
+            !allowedTypes.includes(
+                file.type
             )
         ) {
 
@@ -167,12 +250,13 @@ export default function Profil() {
                 icon: "error",
 
                 title:
-                    "Format tidak valid",
+                    "Format tidak didukung",
 
                 text:
-                    "Silakan pilih file gambar.",
+                    "Gunakan format JPG, JPEG, PNG, atau WEBP.",
 
             });
+
 
             e.target.value = "";
 
@@ -180,6 +264,10 @@ export default function Profil() {
 
         }
 
+
+        // =========================================
+        // CEK UKURAN
+        // =========================================
 
         if (
             file.size >
@@ -198,6 +286,7 @@ export default function Profil() {
 
             });
 
+
             e.target.value = "";
 
             return;
@@ -205,7 +294,11 @@ export default function Profil() {
         }
 
 
-        const imageUrl =
+        // =========================================
+        // PREVIEW
+        // =========================================
+
+        const preview =
             URL.createObjectURL(
                 file
             );
@@ -215,16 +308,57 @@ export default function Profil() {
 
             file: file,
 
-            preview: imageUrl,
+            preview: preview
 
         });
 
     };
 
 
-    // ==========================================
-    // SIMPAN
-    // ==========================================
+    // =========================================
+    // BUKA FILE
+    // =========================================
+
+    const handlePilihFoto = () => {
+
+        fileInputRef.current?.click();
+
+    };
+
+
+    // =========================================
+    // BATAL
+    // =========================================
+
+    const handleBatal = () => {
+
+        setFoto(
+            null
+        );
+
+
+        if (
+            fileInputRef.current
+        ) {
+
+            fileInputRef.current.value =
+                "";
+
+        }
+
+
+        setNama(
+            localStorage.getItem(
+                "nama"
+            ) || ""
+        );
+
+    };
+
+
+    // =========================================
+    // SIMPAN PROFIL
+    // =========================================
 
     const handleSubmit = async (
         e
@@ -245,26 +379,7 @@ export default function Profil() {
                     "Nama belum diisi",
 
                 text:
-                    "Silakan masukkan nama terlebih dahulu.",
-
-            });
-
-            return;
-
-        }
-
-
-        if (!profilId) {
-
-            Swal.fire({
-
-                icon: "error",
-
-                title:
-                    "Profil tidak ditemukan",
-
-                text:
-                    "ID profil tidak tersedia.",
+                    "Silakan isi nama terlebih dahulu.",
 
             });
 
@@ -275,7 +390,9 @@ export default function Profil() {
 
         try {
 
-            setLoading(true);
+            setSaving(
+                true
+            );
 
 
             const formData =
@@ -306,19 +423,57 @@ export default function Profil() {
             }
 
 
-            const response =
-                await axios.put(
+            let response;
 
-                    `${API_URL}/profil/${profilId}`,
 
-                    formData
+            // =========================================
+            // PROFIL SUDAH ADA = UPDATE
+            // =========================================
 
-                );
+            if (profilAda) {
+
+                response =
+                    await axios.put(
+
+                        `${API_URL}/profil`,
+
+                        formData
+
+                    );
+
+            }
+
+            // =========================================
+            // PROFIL BELUM ADA = CREATE
+            // =========================================
+
+            else {
+
+                response =
+                    await axios.post(
+
+                        `${API_URL}/profil`,
+
+                        formData
+
+                    );
+
+            }
+
+
+            console.log(
+                "RESPONSE SIMPAN PROFIL:",
+                response.data
+            );
 
 
             const data =
                 response.data.data;
 
+
+            // =========================================
+            // UPDATE STATE NAMA
+            // =========================================
 
             setNama(
                 data.nama
@@ -334,10 +489,15 @@ export default function Profil() {
             );
 
 
-            if (data.foto) {
+            // =========================================
+            // UPDATE FOTO
+            // =========================================
+
+            if (
+                data.foto
+            ) {
 
                 const fotoUrl =
-
                     `${API_URL}/uploads/profil/${data.foto}`;
 
 
@@ -357,7 +517,14 @@ export default function Profil() {
             }
 
 
-            setFoto(null);
+            setFoto(
+                null
+            );
+
+
+            setProfilAda(
+                true
+            );
 
 
             if (
@@ -370,6 +537,7 @@ export default function Profil() {
             }
 
 
+            // Update sidebar
             window.dispatchEvent(
 
                 new Event(
@@ -387,7 +555,10 @@ export default function Profil() {
                     "Berhasil!",
 
                 text:
-                    "Profil berhasil diperbarui.",
+
+                    response.data.message ||
+
+                    "Profil berhasil disimpan.",
 
                 timer: 1500,
 
@@ -395,15 +566,13 @@ export default function Profil() {
 
             });
 
+
         } catch (error) {
 
             console.error(
-
-                "ERROR UPDATE PROFIL:",
-
+                "ERROR SIMPAN PROFIL:",
                 error.response?.data ||
                 error
-
             );
 
 
@@ -418,115 +587,133 @@ export default function Profil() {
 
                     error.response?.data?.message ||
 
-                    "Terjadi kesalahan saat memperbarui profil.",
+                    "Terjadi kesalahan saat menyimpan profil.",
 
             });
 
+
         } finally {
 
-            setLoading(false);
+            setSaving(
+                false
+            );
 
         }
 
     };
 
 
-    const handleHapusFoto = () => {
+    // =========================================
+    // FOTO YANG DITAMPILKAN
+    // =========================================
 
-        setFoto(null);
-
-        if (
-            fileInputRef.current
-        ) {
-
-            fileInputRef.current.value =
-                "";
-
-        }
-
-    };
+    const previewFoto =
+        foto?.preview ||
+        fotoAwal;
 
 
-    const handleBatal = () => {
+    // =========================================
+    // LOADING
+    // =========================================
 
-        setNama(
+    if (loading) {
 
-            localStorage.getItem(
-                "nama"
-            ) || ""
+        return (
+
+            <div
+                className="d-flex justify-content-center align-items-center"
+                style={{
+                    minHeight: "80vh"
+                }}
+            >
+
+                <div
+                    className="spinner-border text-primary"
+                    role="status"
+                />
+
+            </div>
 
         );
 
-        setFoto(null);
-
-        if (
-            fileInputRef.current
-        ) {
-
-            fileInputRef.current.value =
-                "";
-
-        }
-
-    };
-
-
-    const previewFoto =
-        foto?.preview || fotoAwal;
+    }
 
 
     return (
 
         <div
             className="container-fluid py-4"
-            style={{
-                backgroundColor: "#f8f9fa",
-                minHeight: "100vh",
-            }}
         >
 
             <div
-                className="container"
+                className="mx-auto"
                 style={{
-                    maxWidth: "900px",
+                    maxWidth: "900px"
                 }}
             >
 
-                <div className="mb-4">
 
-                    <h3 className="fw-bold mb-1">
+                {/* ========================================= */}
+                {/* HEADER */}
+                {/* ========================================= */}
+
+                <div
+                    className="mb-4"
+                >
+
+                    <h2
+                        className="fw-bold mb-1"
+                    >
                         Profil Saya
-                    </h3>
+                    </h2>
 
-                    <p className="text-muted mb-0">
+
+                    <p
+                        className="text-muted mb-0"
+                    >
                         Kelola informasi profil dan foto kamu
                     </p>
 
                 </div>
 
 
-                <div className="card border-0 shadow-sm">
+                {/* ========================================= */}
+                {/* CARD */}
+                {/* ========================================= */}
 
-                    <div className="card-body p-4 p-md-5">
+                <div
+                    className="card border-0 shadow-sm"
+                >
+
+                    <div
+                        className="card-body p-4 p-md-5"
+                    >
 
                         <form
                             onSubmit={handleSubmit}
                         >
 
-                            <div className="row">
+                            <div
+                                className="row align-items-center"
+                            >
 
 
+                                {/* ========================================= */}
                                 {/* FOTO */}
+                                {/* ========================================= */}
 
-                                <div className="col-md-4 text-center mb-4 mb-md-0">
+                                <div
+                                    className="col-md-4 text-center mb-4 mb-md-0"
+                                >
 
                                     <div
-                                        className="mx-auto position-relative"
+                                        className="position-relative mx-auto"
                                         style={{
                                             width: "170px",
-                                            height: "170px",
+                                            height: "170px"
                                         }}
                                     >
+
 
                                         {previewFoto ? (
 
@@ -538,28 +725,31 @@ export default function Profil() {
                                                     width: "170px",
                                                     height: "170px",
                                                     objectFit: "cover",
-                                                    border: "5px solid #fff",
+                                                    border:
+                                                        "5px solid white",
                                                     boxShadow:
-                                                        "0 4px 15px rgba(0,0,0,0.12)",
+                                                        "0 4px 20px rgba(0,0,0,0.15)"
                                                 }}
                                             />
 
                                         ) : (
 
                                             <div
-                                                className="rounded-circle d-flex align-items-center justify-content-center"
+                                                className="rounded-circle d-flex justify-content-center align-items-center"
                                                 style={{
                                                     width: "170px",
                                                     height: "170px",
-                                                    backgroundColor: "#e9ecef",
-                                                    border: "5px solid #fff",
+                                                    background:
+                                                        "#eef1f5",
+                                                    border:
+                                                        "5px solid white",
                                                     boxShadow:
-                                                        "0 4px 15px rgba(0,0,0,0.12)",
+                                                        "0 4px 20px rgba(0,0,0,0.15)"
                                                 }}
                                             >
 
                                                 <RiUser3Line
-                                                    size={75}
+                                                    size={80}
                                                     color="#6c757d"
                                                 />
 
@@ -570,15 +760,15 @@ export default function Profil() {
 
                                         <button
                                             type="button"
-                                            onClick={() =>
-                                                fileInputRef.current?.click()
+                                            onClick={
+                                                handlePilihFoto
                                             }
-                                            className="btn btn-primary rounded-circle position-absolute d-flex align-items-center justify-content-center"
+                                            className="btn btn-primary rounded-circle position-absolute d-flex justify-content-center align-items-center"
                                             style={{
-                                                width: "48px",
-                                                height: "48px",
-                                                right: "5px",
-                                                bottom: "5px",
+                                                width: "50px",
+                                                height: "50px",
+                                                right: "0",
+                                                bottom: "0"
                                             }}
                                         >
 
@@ -594,55 +784,63 @@ export default function Profil() {
                                     <input
                                         ref={fileInputRef}
                                         type="file"
-                                        accept="image/*"
-                                        onChange={handleFotoChange}
+                                        accept=".jpg,.jpeg,.png,.webp"
+                                        onChange={
+                                            handleFotoChange
+                                        }
                                         className="d-none"
                                     />
 
 
-                                    <h6 className="fw-semibold mt-4 mb-1">
+                                    <h6
+                                        className="fw-semibold mt-4 mb-1"
+                                    >
                                         Foto Profil
                                     </h6>
 
-                                    <small className="text-muted d-block">
+
+                                    <small
+                                        className="text-muted d-block"
+                                    >
                                         JPG, JPEG, PNG, WEBP
                                     </small>
 
-                                    <small className="text-muted d-block mb-3">
+
+                                    <small
+                                        className="text-muted d-block"
+                                    >
                                         Maksimal 2 MB
                                     </small>
-
-
-                                    {foto && (
-
-                                        <button
-                                            type="button"
-                                            onClick={handleHapusFoto}
-                                            className="btn btn-sm btn-outline-danger"
-                                        >
-
-                                            Hapus Foto
-
-                                        </button>
-
-                                    )}
 
                                 </div>
 
 
-                                {/* DATA */}
+                                {/* ========================================= */}
+                                {/* FORM */}
+                                {/* ========================================= */}
 
-                                <div className="col-md-8">
+                                <div
+                                    className="col-md-8"
+                                >
 
-                                    <div className="mb-4">
+                                    <div
+                                        className="mb-4"
+                                    >
 
-                                        <label className="form-label fw-semibold">
+                                        <label
+                                            className="form-label fw-semibold"
+                                        >
                                             Nama Lengkap
                                         </label>
 
-                                        <div className="input-group">
 
-                                            <span className="input-group-text bg-white">
+                                        <div
+                                            className="input-group"
+                                        >
+
+                                            <span
+                                                className="input-group-text bg-white"
+                                            >
 
                                                 <RiUser3Line
                                                     size={20}
@@ -664,10 +862,12 @@ export default function Profil() {
                                             />
 
 
-                                            <span className="input-group-text bg-white">
+                                            <span
+                                                className="input-group-text bg-white"
+                                            >
 
                                                 <RiEditLine
-                                                    size={19}
+                                                    size={20}
                                                 />
 
                                             </span>
@@ -677,33 +877,88 @@ export default function Profil() {
                                     </div>
 
 
-                                    <div className="d-flex justify-content-end gap-2">
+                                    {/* ========================================= */}
+                                    {/* INFO */}
+                                    {/* ========================================= */}
+
+                                    <div
+                                        className="p-3 rounded mb-4"
+                                        style={{
+                                            background:
+                                                "#f6f7f9"
+                                        }}
+                                    >
+
+                                        <div
+                                            className="d-flex gap-2"
+                                        >
+
+                                            <RiUser3Line
+                                                size={20}
+                                                className="mt-1"
+                                            />
+
+
+                                            <div>
+
+                                                <h6
+                                                    className="fw-semibold mb-2"
+                                                >
+                                                    Informasi Profil
+                                                </h6>
+
+
+                                                <p
+                                                    className="text-muted mb-0 small"
+                                                >
+                                                    Kamu dapat mengubah nama
+                                                    dan foto profil melalui
+                                                    halaman ini.
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* ========================================= */}
+                                    {/* BUTTON */}
+                                    {/* ========================================= */}
+
+                                    <div
+                                        className="d-flex justify-content-end gap-2"
+                                    >
 
                                         <button
                                             type="button"
                                             className="btn btn-light border px-4"
-                                            onClick={handleBatal}
-                                            disabled={loading}
+                                            onClick={
+                                                handleBatal
+                                            }
+                                            disabled={
+                                                saving
+                                            }
                                         >
-
                                             Batal
-
                                         </button>
 
 
                                         <button
                                             type="submit"
                                             className="btn btn-primary px-4 d-flex align-items-center gap-2"
-                                            disabled={loading}
+                                            disabled={
+                                                saving
+                                            }
                                         >
 
-                                            {loading ? (
+                                            {saving ? (
 
                                                 <>
 
                                                     <span
                                                         className="spinner-border spinner-border-sm"
-                                                        role="status"
                                                     />
 
                                                     Menyimpan...
@@ -744,4 +999,7 @@ export default function Profil() {
 
     );
 
-}
+};
+
+
+export default Profil;
