@@ -11,6 +11,8 @@ import {
 
 import { Modal } from "react-bootstrap";
 
+import axios from "axios";
+
 import Swal from "sweetalert2";
 
 import {
@@ -26,14 +28,33 @@ import {
 } from "react-icons/ri";
 
 
+// ==========================================
+// API URL
+// ==========================================
+
+const API_URL =
+    "https://user-manajemen-be-production.up.railway.app";
+
+
+// ==========================================
+// SIDEBAR
+// ==========================================
+
 const Sidebar = ({
     open,
     setOpen,
 }) => {
 
-    const sidebarRef = useRef(null);
+    const sidebarRef =
+        useRef(null);
 
-    const navigate = useNavigate();
+    const navigate =
+        useNavigate();
+
+
+    // ==========================================
+    // LOGOUT STATE
+    // ==========================================
 
     const [showLogout, setShowLogout] =
         useState(false);
@@ -50,52 +71,103 @@ const Sidebar = ({
     // ==========================================
 
     const [namaProfil, setNamaProfil] =
-        useState(
-            localStorage.getItem("nama") ||
-            "Aizen"
-        );
+        useState("Aizen");
 
     const [fotoProfil, setFotoProfil] =
-        useState(
-            localStorage.getItem("foto") ||
-            null
-        );
+        useState(null);
 
 
     // ==========================================
-    // LOAD PROFIL DARI LOCAL STORAGE
+    // AMBIL PROFIL DARI BACKEND
+    // ==========================================
+
+    const getProfilSidebar = async () => {
+
+        try {
+
+            const response =
+                await axios.get(
+                    `${API_URL}/profil`
+                );
+
+            console.log(
+                "DATA PROFIL SIDEBAR:",
+                response.data
+            );
+
+
+            const data =
+                response.data.data;
+
+
+            // ==========================================
+            // NAMA
+            // ==========================================
+
+            setNamaProfil(
+                data.nama || "Aizen"
+            );
+
+
+            // ==========================================
+            // FOTO
+            // ==========================================
+
+            if (data.foto) {
+
+                setFotoProfil(
+                    `${API_URL}/uploads/profil/${data.foto}`
+                );
+
+            } else {
+
+                setFotoProfil(null);
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "ERROR GET PROFIL SIDEBAR:",
+                error.response?.data || error
+            );
+
+
+            // ==========================================
+            // PROFIL BELUM ADA
+            // ==========================================
+
+            if (
+                error.response?.status === 404
+            ) {
+
+                setNamaProfil("Aizen");
+
+                setFotoProfil(null);
+
+            }
+
+        }
+
+    };
+
+
+    // ==========================================
+    // LOAD PROFIL
     // ==========================================
 
     useEffect(() => {
 
-        const updateProfil = () => {
+        getProfilSidebar();
 
-            const nama =
-                localStorage.getItem("nama");
 
-            const foto =
-                localStorage.getItem("foto");
-
-            setNamaProfil(
-                nama || "Aizen"
-            );
-
-            setFotoProfil(
-                foto || null
-            );
-        };
-
+        // ==========================================
+        // LISTEN SAAT PROFIL DIUPDATE
+        // ==========================================
 
         window.addEventListener(
             "profilUpdated",
-            updateProfil
-        );
-
-
-        // Update ketika kembali ke halaman
-        window.addEventListener(
-            "storage",
-            updateProfil
+            getProfilSidebar
         );
 
 
@@ -103,12 +175,7 @@ const Sidebar = ({
 
             window.removeEventListener(
                 "profilUpdated",
-                updateProfil
-            );
-
-            window.removeEventListener(
-                "storage",
-                updateProfil
+                getProfilSidebar
             );
 
         };
@@ -134,7 +201,9 @@ const Sidebar = ({
                 setOpen(false);
 
                 setShowLogout(false);
+
             }
+
         };
 
 
@@ -165,22 +234,36 @@ const Sidebar = ({
         setShowLogout(false);
 
         setShowLogoutConfirm(true);
+
     };
 
+
+    // ==========================================
+    // CANCEL LOGOUT
+    // ==========================================
 
     const handleCancelLogout = () => {
 
         setShowLogoutConfirm(false);
+
     };
 
+
+    // ==========================================
+    // CONFIRM LOGOUT
+    // ==========================================
 
     const handleConfirmLogout = async () => {
 
         setIsLoggingOut(true);
 
+
         await new Promise(
             (resolve) =>
-                setTimeout(resolve, 400)
+                setTimeout(
+                    resolve,
+                    400
+                )
         );
 
 
@@ -189,19 +272,31 @@ const Sidebar = ({
         setShowLogoutConfirm(false);
 
 
-        // Hapus data login
-        localStorage.removeItem("nama");
-        localStorage.removeItem("foto");
-        localStorage.removeItem("userId");
+        // ==========================================
+        // HAPUS DATA LOGIN SAJA
+        // ==========================================
+
+        localStorage.removeItem(
+            "userId"
+        );
 
 
         Swal.fire({
+
             icon: "success",
-            title: "Berhasil Keluar",
+
+            title:
+                "Berhasil Keluar",
+
             confirmButtonColor:
                 "#0B2B8E",
-            timer: 1500,
-            showConfirmButton: false,
+
+            timer:
+                1500,
+
+            showConfirmButton:
+                false,
+
         }).then(() => {
 
             navigate("/");
@@ -211,34 +306,65 @@ const Sidebar = ({
     };
 
 
+    // ==========================================
+    // RENDER
+    // ==========================================
+
     return (
 
-        <div ref={sidebarRef}>
+        <div
+            ref={sidebarRef}
+        >
+
 
             {/* ================================= */}
             {/* SIDEBAR */}
             {/* ================================= */}
 
             <div
+
                 className="position-fixed top-0 start-0 d-flex flex-column align-items-center py-3"
+
                 style={{
-                    width: "200px",
-                    height: "100vh",
-                    zIndex: 1000,
-                    backgroundColor: "#2736B8",
+
+                    width:
+                        "200px",
+
+                    height:
+                        "100vh",
+
+                    zIndex:
+                        1000,
+
+                    backgroundColor:
+                        "#2736B8",
+
                 }}
+
             >
 
+
+                {/* ================================= */}
                 {/* TITLE */}
+                {/* ================================= */}
 
                 <h1
+
                     className="text-white mt-2"
+
                     style={{
-                        fontSize: "25px",
+
+                        fontSize:
+                            "25px",
+
                     }}
+
                 >
+
                     Dashboard
+
                 </h1>
+
 
 
                 {/* ================================= */}
@@ -246,32 +372,55 @@ const Sidebar = ({
                 {/* ================================= */}
 
                 <NavLink
+
                     to="/dashboard"
+
                     className="text-decoration-none d-flex flex-row align-items-center justify-content-start w-100 px-3 mt-4"
-                    style={({ isActive }) => ({
-                        color: "#ffffff",
+
+                    style={({
+                        isActive
+                    }) => ({
+
+                        color:
+                            "#ffffff",
+
                         fontWeight:
                             isActive
                                 ? "700"
                                 : "400",
+
                     })}
+
                 >
 
                     <RiHome5Line
                         size={22}
                     />
 
+
                     <span
+
                         style={{
-                            fontSize: "15px",
-                            marginTop: "4px",
-                            marginLeft: "8px",
+
+                            fontSize:
+                                "15px",
+
+                            marginTop:
+                                "4px",
+
+                            marginLeft:
+                                "8px",
+
                         }}
+
                     >
+
                         Beranda
+
                     </span>
 
                 </NavLink>
+
 
 
                 {/* ================================= */}
@@ -279,30 +428,49 @@ const Sidebar = ({
                 {/* ================================= */}
 
                 <NavLink
+
                     to="/user-management"
+
                     className="text-decoration-none d-flex flex-row align-items-center justify-content-start w-100 px-3 mt-3"
-                    style={({ isActive }) => ({
-                        color: "#ffffff",
+
+                    style={({
+                        isActive
+                    }) => ({
+
+                        color:
+                            "#ffffff",
+
                         fontWeight:
                             isActive
                                 ? "700"
                                 : "400",
+
                     })}
+
                 >
 
                     <RiSettings3Fill
                         size={20}
                     />
 
+
                     <span
+
                         style={{
-                            marginLeft: "8px",
+
+                            marginLeft:
+                                "8px",
+
                         }}
+
                     >
+
                         User Management
+
                     </span>
 
                 </NavLink>
+
 
 
                 {/* ================================= */}
@@ -310,44 +478,71 @@ const Sidebar = ({
                 {/* ================================= */}
 
                 <button
+
+                    type="button"
+
                     onClick={() =>
                         setOpen(!open)
                     }
+
                     className="border-0 bg-transparent d-flex align-items-center justify-content-between w-100 px-3 py-2 mt-3"
+
                     style={{
-                        color: "#FFFFFF",
+
+                        color:
+                            "#FFFFFF",
+
                     }}
+
                 >
 
-                    <div className="d-flex align-items-center gap-2">
+                    <div
+                        className="d-flex align-items-center gap-2"
+                    >
 
                         <RiBookOpenLine
                             size={20}
                         />
 
+
                         <span
+
                             style={{
-                                fontSize: "15px",
+
+                                fontSize:
+                                    "15px",
+
                             }}
+
                         >
+
                             Kelas LMS
+
                         </span>
 
                     </div>
 
 
                     <RiArrowRightSLine
+
                         size={18}
+
                         style={{
-                            transform: open
-                                ? "rotate(90deg)"
-                                : "rotate(0deg)",
+
+                            transform:
+                                open
+                                    ? "rotate(90deg)"
+                                    : "rotate(0deg)",
+
                             transition:
                                 "transform 0.3s ease",
+
                         }}
+
                     />
 
                 </button>
+
 
 
                 {/* ================================= */}
@@ -360,21 +555,31 @@ const Sidebar = ({
                         className="w-100 mt-1 px-2"
                     >
 
+
                         {/* PRESENSI */}
 
                         <NavLink
+
                             to="/presensi"
+
                             onClick={() =>
                                 setOpen(false)
                             }
+
                             className="text-decoration-none d-block"
+
                         >
 
-                            {({ isActive }) => (
+                            {({
+                                isActive
+                            }) => (
 
                                 <div
+
                                     className="d-flex align-items-center gap-2 rounded-3 px-3 py-2 mb-1"
+
                                     style={{
+
                                         backgroundColor:
                                             isActive
                                                 ? "#FFFFFF"
@@ -389,15 +594,20 @@ const Sidebar = ({
                                             isActive
                                                 ? "600"
                                                 : "400",
+
                                     }}
+
                                 >
 
                                     <RiCalendarCheckLine
                                         size={20}
                                     />
 
+
                                     <span>
+
                                         Presensi Peserta
+
                                     </span>
 
                                 </div>
@@ -407,21 +617,31 @@ const Sidebar = ({
                         </NavLink>
 
 
+
                         {/* INPUT NILAI */}
 
                         <NavLink
+
                             to="/input-nilai"
+
                             onClick={() =>
                                 setOpen(false)
                             }
+
                             className="text-decoration-none d-block"
+
                         >
 
-                            {({ isActive }) => (
+                            {({
+                                isActive
+                            }) => (
 
                                 <div
+
                                     className="d-flex align-items-center gap-2 rounded-3 px-3 py-2 mb-1"
+
                                     style={{
+
                                         backgroundColor:
                                             isActive
                                                 ? "#FFFFFF"
@@ -436,15 +656,20 @@ const Sidebar = ({
                                             isActive
                                                 ? "600"
                                                 : "400",
+
                                     }}
+
                                 >
 
                                     <RiFileList3Line
                                         size={20}
                                     />
 
+
                                     <span>
+
                                         Input Nilai
+
                                     </span>
 
                                 </div>
@@ -454,21 +679,31 @@ const Sidebar = ({
                         </NavLink>
 
 
+
                         {/* SERTIFIKAT */}
 
                         <NavLink
+
                             to="/sertifikat"
+
                             onClick={() =>
                                 setOpen(false)
                             }
+
                             className="text-decoration-none d-block"
+
                         >
 
-                            {({ isActive }) => (
+                            {({
+                                isActive
+                            }) => (
 
                                 <div
+
                                     className="d-flex align-items-center gap-2 rounded-3 px-3 py-2"
+
                                     style={{
+
                                         backgroundColor:
                                             isActive
                                                 ? "#FFFFFF"
@@ -483,15 +718,20 @@ const Sidebar = ({
                                             isActive
                                                 ? "600"
                                                 : "400",
+
                                     }}
+
                                 >
 
                                     <RiMedalLine
                                         size={20}
                                     />
 
+
                                     <span>
+
                                         Sertifikat
+
                                     </span>
 
                                 </div>
@@ -505,37 +745,59 @@ const Sidebar = ({
                 )}
 
 
+
                 {/* ================================= */}
                 {/* PROFILE / LOGOUT */}
                 {/* ================================= */}
 
                 <div
+
                     className="mt-auto w-100 position-relative px-2"
+
                 >
+
 
                     <hr
                         className="border-light opacity-50 mx-2"
                     />
 
 
+
+                    {/* ================================= */}
                     {/* LOGOUT MENU */}
+                    {/* ================================= */}
 
                     {showLogout && (
 
                         <div
+
                             className="position-absolute bg-white rounded-3 shadow-sm p-2"
+
                             style={{
-                                bottom: "68px",
-                                left: "12px",
-                                right: "12px",
-                                zIndex: 1100,
+
+                                bottom:
+                                    "68px",
+
+                                left:
+                                    "12px",
+
+                                right:
+                                    "12px",
+
+                                zIndex:
+                                    1100,
+
                             }}
+
                         >
+
 
                             {/* PROFIL */}
 
                             <button
+
                                 type="button"
+
                                 onClick={() => {
 
                                     setShowLogout(false);
@@ -545,10 +807,16 @@ const Sidebar = ({
                                     );
 
                                 }}
+
                                 className="btn w-100 d-flex align-items-center gap-2 fw-semibold border-0 bg-transparent"
+
                                 style={{
-                                    fontSize: "14px",
+
+                                    fontSize:
+                                        "14px",
+
                                 }}
+
                             >
 
                                 <RiUser3Line
@@ -560,17 +828,26 @@ const Sidebar = ({
                             </button>
 
 
+
                             {/* LOGOUT */}
 
                             <button
+
                                 type="button"
+
                                 onClick={
                                     handleLogout
                                 }
+
                                 className="btn w-100 d-flex align-items-center gap-2 text-danger fw-semibold border-0 bg-transparent"
+
                                 style={{
-                                    fontSize: "14px",
+
+                                    fontSize:
+                                        "14px",
+
                                 }}
+
                             >
 
                                 <RiLogoutBoxRLine
@@ -586,59 +863,107 @@ const Sidebar = ({
                     )}
 
 
+
+                    {/* ================================= */}
                     {/* PROFILE BUTTON */}
+                    {/* ================================= */}
 
                     <button
+
                         type="button"
+
                         onClick={() =>
                             setShowLogout(
-                                (prev) => !prev
+                                (prev) =>
+                                    !prev
                             )
                         }
+
                         className="text-decoration-none text-white d-flex align-items-center px-3 py-2 w-100 border-0 bg-transparent"
+
                         style={{
-                            gap: "10px",
+
+                            gap:
+                                "10px",
+
                         }}
+
                     >
 
-                        {/* FOTO */}
+
+                        {/* ================================= */}
+                        {/* FOTO PROFIL */}
+                        {/* ================================= */}
 
                         {fotoProfil ? (
 
                             <img
+
                                 src={fotoProfil}
+
                                 alt="Profile"
+
                                 className="rounded-circle"
+
                                 style={{
-                                    width: "45px",
-                                    height: "45px",
-                                    objectFit: "cover",
+
+                                    width:
+                                        "45px",
+
+                                    height:
+                                        "45px",
+
+                                    objectFit:
+                                        "cover",
+
                                     border:
                                         "2px solid white",
+
                                 }}
+
                                 onError={(e) => {
+
+                                    console.error(
+                                        "GAGAL LOAD FOTO:",
+                                        fotoProfil
+                                    );
 
                                     e.currentTarget.style.display =
                                         "none";
 
+                                    setFotoProfil(null);
+
                                 }}
+
                             />
 
                         ) : (
 
                             <div
+
                                 className="rounded-circle d-flex align-items-center justify-content-center"
+
                                 style={{
-                                    width: "45px",
-                                    height: "45px",
+
+                                    width:
+                                        "45px",
+
+                                    height:
+                                        "45px",
+
                                     backgroundColor:
                                         "#ffffff",
+
                                 }}
+
                             >
 
                                 <RiUser3Line
+
                                     size={25}
+
                                     color="#2736B8"
+
                                 />
 
                             </div>
@@ -646,19 +971,31 @@ const Sidebar = ({
                         )}
 
 
+
+                        {/* ================================= */}
                         {/* NAMA */}
+                        {/* ================================= */}
 
                         <span>
+
                             {namaProfil}
+
                         </span>
 
 
+
+                        {/* ================================= */}
                         {/* ARROW */}
+                        {/* ================================= */}
 
                         <RiArrowRightSLine
+
                             size={18}
+
                             className="ms-auto"
+
                             style={{
+
                                 transform:
                                     showLogout
                                         ? "rotate(-90deg)"
@@ -666,7 +1003,9 @@ const Sidebar = ({
 
                                 transition:
                                     "transform 0.3s ease",
+
                             }}
+
                         />
 
                     </button>
@@ -676,81 +1015,143 @@ const Sidebar = ({
             </div>
 
 
+
             {/* ================================= */}
             {/* MODAL LOGOUT */}
             {/* ================================= */}
 
             <Modal
-                show={showLogoutConfirm}
+
+                show={
+                    showLogoutConfirm
+                }
+
                 onHide={
                     handleCancelLogout
                 }
+
                 centered
+
             >
 
                 <Modal.Body
                     className="p-4"
                 >
 
-                    <div className="d-flex justify-content-between align-items-center mb-2">
+                    <div
 
-                        <h5 className="fw-bold mb-0">
+                        className="d-flex justify-content-between align-items-center mb-2"
+
+                    >
+
+                        <h5
+                            className="fw-bold mb-0"
+                        >
+
                             Konfirmasi
+
                         </h5>
 
+
                         <button
+
                             type="button"
+
                             className="btn btn-sm p-1 text-muted"
+
                             style={{
-                                border: "none",
-                                background: "none",
-                                fontSize: "22px",
-                                lineHeight: 1,
+
+                                border:
+                                    "none",
+
+                                background:
+                                    "none",
+
+                                fontSize:
+                                    "22px",
+
+                                lineHeight:
+                                    1,
+
                             }}
+
                             onClick={
                                 handleCancelLogout
                             }
+
                         >
+
                             &times;
+
                         </button>
 
                     </div>
 
 
-                    <p className="text-muted small mb-4">
+
+                    <p
+                        className="text-muted small mb-4"
+                    >
+
                         Apakah Anda ingin keluar?
+
                     </p>
 
 
-                    <div className="d-flex gap-2">
+
+                    <div
+                        className="d-flex gap-2"
+                    >
+
+
+                        {/* YA */}
 
                         <button
+
                             type="button"
+
                             className="btn flex-fill fw-semibold text-white d-flex align-items-center justify-content-center gap-2"
+
                             style={{
+
                                 backgroundColor:
                                     "#0B2B8E",
-                                borderRadius: "8px",
-                                padding: "10px 0",
-                                border: "none",
+
+                                borderRadius:
+                                    "8px",
+
+                                padding:
+                                    "10px 0",
+
+                                border:
+                                    "none",
+
                             }}
+
                             onClick={
                                 handleConfirmLogout
                             }
+
                             disabled={
                                 isLoggingOut
                             }
+
                         >
 
                             {isLoggingOut && (
 
                                 <span
+
                                     className="spinner-border spinner-border-sm"
+
                                     role="status"
+
                                     aria-hidden="true"
+
                                 />
 
                             )}
+
 
                             {isLoggingOut
                                 ? "Keluar..."
@@ -759,27 +1160,46 @@ const Sidebar = ({
                         </button>
 
 
+
+                        {/* TIDAK */}
+
                         <button
+
                             type="button"
+
                             className="btn flex-fill fw-semibold"
+
                             style={{
+
                                 backgroundColor:
                                     "#fff",
+
                                 color:
                                     "#0B2B8E",
+
                                 border:
                                     "1px solid #0B2B8E",
-                                borderRadius: "8px",
-                                padding: "10px 0",
+
+                                borderRadius:
+                                    "8px",
+
+                                padding:
+                                    "10px 0",
+
                             }}
+
                             onClick={
                                 handleCancelLogout
                             }
+
                             disabled={
                                 isLoggingOut
                             }
+
                         >
+
                             TIDAK
+
                         </button>
 
                     </div>
@@ -789,7 +1209,10 @@ const Sidebar = ({
             </Modal>
 
         </div>
+
     );
+
 };
+
 
 export default Sidebar;
